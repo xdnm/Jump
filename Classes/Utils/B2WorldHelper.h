@@ -32,7 +32,9 @@ public:
 	void putDeadPool(b2Body *body)
 	{
 		if(body	!= NULL)
+        {
 			m_deadPool->push_back(body);
+        }
 	}
     void putActivePool(b2Body *body)
     {
@@ -48,6 +50,11 @@ public:
         {
 
         }
+    }
+    void putDestroyJointPool(b2JointDef *jointDef)
+    {
+        if(jointDef != NULL)
+            m_destroyJointPool->push_back(jointDef);
     }
 
 	inline void colliedLog(b2Contact *contact)
@@ -66,6 +73,7 @@ private:
     vector<b2Body*> *m_activePool;
 	vector<b2Body*> *m_deadPool;
     vector<b2JointDef*> *m_jointPool;
+    vector<b2JointDef*> *m_destroyJointPool;
 	B2Helper();
 	b2World *m_world;
 };

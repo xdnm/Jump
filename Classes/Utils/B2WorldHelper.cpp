@@ -7,6 +7,7 @@ B2Helper::B2Helper()
 	m_sleepingPool = new vector<b2Body*>();
     m_activePool = new vector<b2Body*>();
     m_jointPool = new vector<b2JointDef*>();
+    m_destroyJointPool = new vector<b2JointDef*>();
 }
 
 b2World* B2Helper::getWorld()
@@ -95,7 +96,8 @@ void B2Helper::bodiesListener(float dt)
 	{
 		for(iter = m_sleepingPool->begin(); iter != m_sleepingPool->end(); ++iter)
 		{
-			(*iter)->SetActive(false);
+            if(*iter != NULL)
+			    (*iter)->SetActive(false);
 		}
 		m_sleepingPool->clear();
 	}
@@ -104,7 +106,9 @@ void B2Helper::bodiesListener(float dt)
 	{
 		for (iter = m_deadPool->begin(); iter != m_deadPool->end(); ++iter)
 		{
-			m_world->DestroyBody(*iter);
+            if(*iter != NULL)
+			    m_world->DestroyBody(*iter);
+            *iter = NULL;
 		}
         m_deadPool->clear();
 	}
@@ -113,7 +117,8 @@ void B2Helper::bodiesListener(float dt)
     {
         for(iter = m_activePool->begin(); iter != m_activePool->end(); ++iter)
         {
-            (*iter)->SetActive(true);
+            if(*iter != NULL)
+                (*iter)->SetActive(true);
         }
         m_activePool->clear();
     }
@@ -124,11 +129,41 @@ void B2Helper::bodiesListener(float dt)
         vector<b2JointDef*>::iterator iter;
         for(iter = m_jointPool->begin(); iter != m_jointPool->end(); ++iter)
         {
-            m_world->CreateJoint(*iter);
+            if(*iter != NULL)
+                m_world->CreateJoint(*iter);
+
+            *iter = NULL;
         }
         m_jointPool->clear();
     }
 
+    if(!m_destroyJointPool->empty())
+    {
+        vector<b2JointDef*>::iterator iter;
+        for(iter = m_destroyJointPool->begin(); iter != m_destroyJointPool->end(); ++iter)
+        {
+            if(*iter != NULL)
+            {
+               b2Joint *joint;
+               joint = m_world->GetJointList();
+               while(joint != NULL)
+               {
+                   if(joint->GetType() == (*iter)->type && joint->GetBodyA() == (*iter)->bodyA 
+                       && joint->GetBodyB() == (*iter)->bodyB)
+                   {
+                       m_world->DestroyJoint(joint);
+                       joint = NULL;
+                       break;
+                   }
+                   else
+                   {
+                       joint = joint->GetNext();
+                   }
+               }
+            }
+            *iter = NULL;
+        }
+    }
 
 }
 
