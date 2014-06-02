@@ -197,7 +197,21 @@ void HelloWorld::worldTick(float dt)
 bool HelloWorld::ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
 {
 	//m_role->jump(10.0f);
+    CCPoint touchPoint = this->convertTouchToNodeSpace(pTouch);
+    CCLog("Touch began. Screen point : ( %f, %f)", touchPoint.x, touchPoint.y);
     m_role->attack();
 
 	return true;
+}
+void HelloWorld::ccTouchEnded(CCTouch *pTouch, CCEvent *pEvent)
+{
+    CCPoint touchPoint = this->convertTouchToNodeSpace(pTouch);
+    CCLog("Touch Ended. Screen point : ( %f, %f)", touchPoint.x, touchPoint.y);
+    m_role->onTouchEnded(pTouch, pEvent);
+}
+void HelloWorld::ccTouchMoved(CCTouch *pTouch, CCEvent *pEvent)
+{
+    CCPoint touchPoint = this->convertTouchToNodeSpace(pTouch);
+    CCLog("Touch Moved. Screen point : ( %f, %f)", touchPoint.x, touchPoint.y);
+    m_role->onTouchMoved(pTouch, pEvent);
 }

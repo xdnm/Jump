@@ -24,6 +24,10 @@ public:
     bool attack();
     void onAttacking(b2Contact *contact, b2Body* otherBody);
 
+    //lay touch related functions.
+    bool onTouchBegan(CCTouch *pTouch, CCEvent *pEvent);
+    bool onTouchEnded(CCTouch *pTouch, CCEvent *pEvent);
+    bool onTouchMoved(CCTouch *pTouch, CCEvent *pEvent);
 private:
 	RoleObject();
     void update(float delta);

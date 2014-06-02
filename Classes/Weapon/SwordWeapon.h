@@ -15,6 +15,7 @@ public:
     virtual bool attackAction();
 
     virtual bool hook(b2Contact *contact, b2Body *otherBody);
+    virtual bool endHook();
 
     void createActions();
     virtual bool initActions();
@@ -28,12 +29,12 @@ public:
 
     void update(float delta);
 
-
+    BiliBoard* interationWithOther(b2Contact *contact, b2Body* otherBody);
 private:
     SwordWeapon();
     b2Body *m_hookRoleBody;
     b2Body *m_hookedBody;
-
+    b2DistanceJointDef *m_jointDef;
 
 public:
 private:

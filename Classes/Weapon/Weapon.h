@@ -92,7 +92,8 @@ public:
     void setUnit(float parm);
  
 
-    virtual bool hook(b2Contact *contact, b2Body *otherBody) = 0;
+    virtual bool hook(b2Contact *contact, b2Body *otherBody) {return false;};
+    virtual bool endHook(){ return false;};
     virtual bool attackAction() = 0;
 
     void setIsFaceLeft(bool flag);
@@ -101,10 +102,9 @@ public:
  
     void endAttack();
    
-
     void createActions();
 
-
+    virtual BiliBoard *interationWithOther(b2Contact *contact, b2Body* otherBody){return NULL;};
    
 
     virtual bool initActions(){return false;};
@@ -126,6 +126,11 @@ public:
 
         return point;
     }
+
+    inline bool isHooked()
+    {
+        return m_isHooked;
+    }
 protected:
     inline CCPoint  DefaultPositon();
     inline float        DefaultRotation();
@@ -145,6 +150,8 @@ public:
     BiliBoard *m_biliboard;
 
     CCNode* userdata;
+
+        bool m_isHooked;
 protected:
     CCNode *m_hand;
     
@@ -154,7 +161,7 @@ protected:
 
     bool m_onAttacking;
 
-    bool m_isHooked;
+
 
 
 

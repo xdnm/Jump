@@ -23,19 +23,19 @@ B2Handler* B2Handler::createB2Handler(b2World *world)
 
 void B2Handler::BeginContact(b2Contact* contact)
 {
-    colliedLog(contact);
+    //colliedLog(contact);
 
 
 }
 
 void B2Handler::EndContact(b2Contact* contact)
 {
-
+    
 }
 
 void B2Handler::PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
 {
-    colliedLog(contact);
+    //colliedLog(contact);
     colliedDispatcher(contact);
 }
 

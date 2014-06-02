@@ -144,17 +144,17 @@ void RigidBlock::draw()
 void RigidBlock::onCollied(b2Contact *contact, b2Body *bodyOther)
 {
 
-    if(!contact->IsEnabled())
-        return;
-	//this->setAlive(false);
-    B2CCNode *node = (B2CCNode*)(bodyOther->GetUserData());
+ //   if(!contact->IsEnabled())
+ //       return;
+	////this->setAlive(false);
+ //   B2CCNode *node = (B2CCNode*)(bodyOther->GetUserData());
 
-    if(TagHelper::Instance()->isObject(node->getTag(), ON_ROLE))
-    {
-       
-        RoleObject *role = (RoleObject*)(bodyOther->GetUserData());
+ //   if(TagHelper::Instance()->isObject(node->getTag(), ON_ROLE))
+ //   {
+ //      
+ //       RoleObject *role = (RoleObject*)(bodyOther->GetUserData());
 
-        role->jump(20.0f);
-    }
+ //       role->jump(20.0f);
+ //   }
 }
 

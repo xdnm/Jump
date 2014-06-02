@@ -46,6 +46,7 @@ bool SwordWeapon::initWithParm(CCNode *hand, float unit /* = 1.0f */,b2Body *hoo
         m_hookRoleBody = hookRoleBody;
 
     m_hookedBody = NULL;
+    m_jointDef = NULL;
 
     initActions();
 
@@ -71,14 +72,9 @@ bool SwordWeapon::initWithParm(CCNode *hand, float unit /* = 1.0f */,b2Body *hoo
 
 bool SwordWeapon::hook(b2Contact *contact, b2Body *otherBody)
 {
-    //CCPoint hookPoint = m_weapon->getWeaponPosition();
-
-    /*b2DistanceJointDef *jointDef = new b2DistanceJointDef();
-    jointDef->collideConnected = true;
-    jointDef->dampingRatio = 0.0f;
-    jointDef->frequencyHz = 4.0f;
-    jointDef->Initialize(roleBody, hookedBody, roleBody->GetWorldCenter(),hookedPoint);
-    B2Helper::Instance()->putJointPool(jointDef);*/
+    //return if this weapon is already hook to a body.
+    if(m_isHooked)
+        return false;
 
     m_isHooked = true;
     m_hookedBody = otherBody;
@@ -89,15 +85,32 @@ bool SwordWeapon::hook(b2Contact *contact, b2Body *otherBody)
     this->setRotation(0.0f);
     userdata->addChild(this);
     
-    b2DistanceJointDef *jointDef = new b2DistanceJointDef();
+    m_jointDef= new b2DistanceJointDef();
     b2WorldManifold *maniFold = new b2WorldManifold();
     contact->GetWorldManifold(maniFold);
-    jointDef->collideConnected = true;
-    jointDef->dampingRatio = 0.0f;
-    jointDef->frequencyHz = 4.0f;
-    jointDef->Initialize(m_hookRoleBody, otherBody, m_hookRoleBody->GetWorldCenter(), maniFold->points[0]);
-    B2Helper::Instance()->putJointPool(jointDef);
+    m_jointDef->collideConnected = true;
+    m_jointDef->dampingRatio = 0.0f;
+    m_jointDef->frequencyHz = 4.0f;
+    m_jointDef->Initialize(m_hookRoleBody, otherBody, m_hookRoleBody->GetWorldCenter(), maniFold->points[0]);
+    B2Helper::Instance()->putJointPool(m_jointDef);
     delete maniFold;
+    return true;
+}
+bool SwordWeapon::endHook()
+{
+    if(!m_isHooked)
+        return false;
+    
+    m_isHooked = false;
+    B2Helper::Instance()->putDestroyJointPool(m_jointDef);
+
+    this->userdata->removeChild(this);
+    
+    this->setPosition(m_defaultPosiion);
+    this->setRotation(m_defaultRotation);
+
+    m_hand->addChild(this);
+    
     return true;
 }
 
@@ -163,9 +176,6 @@ bool SwordWeapon::attackAction()
     return true;
 }
 
-//this func use the actiongroup data to build the real action included the call func.
-//I think it's better to put these logic inside the actiongroup constructor , but considering that callfunc need to pass the call object's pointer (like "this" in here)
-//So I put these code out side the actiongroup
 void SwordWeapon::createActions()
 {
     int leftFlag = 1;
@@ -287,6 +297,25 @@ void SwordWeapon::updateAttackArea(float delta)
         CCPoint point = this->getWeaponPosition();
         m_attackAreaBody->SetTransform(b2Vec2(point.x / PTM_RATIO, point.y / PTM_RATIO), 0);
     }
+}
+
+BiliBoard* SwordWeapon::interationWithOther(b2Contact *contact, b2Body* otherBody)
+{
+    CCNode *othernode = static_cast<CCNode*>(otherBody->GetUserData());
+
+    if(othernode == NULL)
+        return NULL;
+    if(tryPushAttackPool(othernode))
+    {
+        CCLog("role interact with tag: %d", othernode->getTag());
+
+        if(TagHelper::Instance()->isObject(othernode->getTag(), ON_BLOCK))
+        {
+            hook(contact, otherBody);
+        }
+    }
+
+    return NULL;
 }
 
 

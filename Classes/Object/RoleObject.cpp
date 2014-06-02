@@ -293,7 +293,7 @@ void RoleObject::onCollied(b2Contact *contact, b2Body *bodyOther)
         return;
 
     //if the role is moving up, ingore this collision
-    if(m_innerBody->GetLinearVelocity().y > 0)
+    if(m_innerBody->GetLinearVelocity().y > 0 || m_weapon->isHooked())
     {
         contact->SetEnabled(false);
 
@@ -303,6 +303,12 @@ void RoleObject::onCollied(b2Contact *contact, b2Body *bodyOther)
     {
         //if role is moving down, but the colliision object is above at the bottom body, ingore this collision.
         contact->SetEnabled(false);
+    }
+    else
+    {
+        if(TagHelper::Instance()->isObject(otherNode->getTag(), ON_BLOCK))
+            jump(10.0f);
+        contact->SetEnabled(true);
     }
 }
 
@@ -401,15 +407,31 @@ void RoleObject::reciveBiliBoard(BiliBoard *board)
         return;
 }
 
+//if weapon attacking area is collied with other body, this function will be called.
 void RoleObject::onAttacking(b2Contact *contact, b2Body* otherBody)
 {
     CCNode *otherNode = static_cast<CCNode*>(otherBody->GetUserData());
     if(otherNode == NULL)
         return;
-    if(m_weapon->tryPushAttackPool(otherNode))
-        m_weapon->hook(contact, otherBody);
-    /*if(TagHelper::Instance()->isObject(otherNode->getTag(), ON_EDGE))
+    
+    m_weapon->interationWithOther(contact, otherBody);
+}
+
+bool RoleObject::onTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
+{
+    return true;
+}
+
+bool RoleObject::onTouchEnded(CCTouch *pTouch, CCEvent *pEvent)
+{
+    if(m_weapon->isHooked())
     {
-        m_weapon->hook(contact, otherBody);
-    }*/
+        m_weapon->endHook();
+    }
+    return true;
+}
+
+bool RoleObject::onTouchMoved(CCTouch *pTouch, CCEvent *pEvent)
+{
+    return true;
 }
