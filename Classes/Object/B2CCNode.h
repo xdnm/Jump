@@ -3,7 +3,7 @@
 
 #include "cocos2d.h"
 #include "Box2D/Box2D.h"
-#include "Utils/BiliBoard.h"
+#include "Model/ObjectModel.h"
 USING_NS_CC;
 
 class B2CCNode : public CCNode
@@ -15,8 +15,10 @@ public:
         m_size = CCSizeMake(0, 0);
         m_isAlive = false;
 
-        m_biliBoard = NULL;
+        m_model = NULL;
     }
+
+    virtual bool initModel(){return true;};
     virtual void setAlive(bool flag){};
 
     bool inline isAlive()
@@ -41,15 +43,15 @@ public:
     }
 
     virtual void onCollied(b2Contact* contact, b2Body *bodyOther) {};
-    virtual void buildBiliBoard(){};
-    virtual BiliBoard* getBiliBoard(){return NULL;};
-    virtual void reciveBiliBoard(BiliBoard *board){};
+public:
+        ObjectModel *m_model;
+
 protected:
     CCPoint m_position;
     CCSize m_size;
     bool m_isAlive;
 
-    BiliBoard *m_biliBoard;
+
 };
 
 

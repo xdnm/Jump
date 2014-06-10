@@ -7,6 +7,7 @@
 #include "Utils/B2WorldHelper.h"
 #include "Utils/TagHelper.h"
 #include "Weapon/Weapon.h"
+#include "Model/ObjectModel.h"
 
 USING_NS_CC;
 
@@ -15,15 +16,14 @@ class Monster : public B2CCNode
 public:
     ~Monster();
     Monster();
-    virtual bool beenTrampled(){ return true; };
 
-    virtual bool beenAttacked(Weapon *weapon){return true;};
-    virtual bool beenHooked(Weapon *weapon){return true;};
+    virtual bool beenTrampled(ObjectModel *model){ return true; };
+    virtual bool attacked(ObjectModel *model){return true;};
+    virtual bool beenHooked(ObjectModel *model){return true;};
 
     virtual void onCollied(b2Contact* contact, b2Body *bodyOther);
-protected:
-    int m_damege;
-    int m_defence;
+    virtual bool isReady()=0;
+   
 
 };
 

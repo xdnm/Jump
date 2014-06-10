@@ -23,7 +23,7 @@ void Monster::onCollied(b2Contact* contact, b2Body *bodyOther)
 
     if(TagHelper::Instance()->isObject(node->getTag(), ON_ROLE))
     {
-        beenTrampled();
+        //beenTrampled();
     }
     
 
