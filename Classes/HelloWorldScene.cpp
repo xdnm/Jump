@@ -1,5 +1,6 @@
 #include "HelloWorldScene.h"
 #include "Object/RigidEdge.h"
+#include "Object/MonsterMushroom.h"
 USING_NS_CC;
 
 CCScene* HelloWorld::scene()
@@ -80,6 +81,7 @@ bool HelloWorld::init()
 	m_world->SetDebugDraw(debugDrawFlag);
 	uint32	flags = 0;
 	flags += b2Draw::e_shapeBit;
+    flags += b2Draw::e_jointBit;
 	debugDrawFlag->SetFlags(flags);
 	B2Helper::Instance()->setWorld(m_world);
 	
@@ -140,15 +142,19 @@ bool HelloWorld::init()
         height += 100;
     }
 
-    RigidEdge *edge = RigidEdge::createRigidEdge(ccp(100, 0), 100, NULL);
-    this->addChild((CCNode*)edge);
+    //RigidEdge *edge = RigidEdge::createRigidEdge(ccp(100, 0), 100, NULL);
+    //this->addChild((CCNode*)edge);
 
-    this->runAction(JumpFollow::create(m_role->m_node));
+    //this->runAction(JumpFollow::create(m_role->m_node));
 
   
-    RigidBlock *block = RigidBlock::createRigidBlock(ccp(150, 250), CCSizeMake(50, 20), NULL);
-    block->setAlive(true);
-    this->addChild((CCNode *)block);
+    //RigidBlock *block = RigidBlock::createRigidBlock(ccp(150, 250), CCSizeMake(50, 20), NULL);
+    //block->setAlive(true);
+    //this->addChild((CCNode *)block);
+
+    MonsterMushroom *mush = MonsterMushroom::createMushroom(ccp(200, 200), CCSizeMake(100, 100), NULL);
+    this->addChild((CCNode*)mush);
+    
     //body->ApplyForce(b2Vec2(10.0f, 0), body->GetWorldCenter());
     //body->ApplyForce(b2Vec2(0, body->GetMass() * gravity.Length()) , body->GetWorldCenter());
 	//--------------end test region--------------------
@@ -199,7 +205,7 @@ bool HelloWorld::ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
 	//m_role->jump(10.0f);
     CCPoint touchPoint = this->convertTouchToNodeSpace(pTouch);
     CCLog("Touch began. Screen point : ( %f, %f)", touchPoint.x, touchPoint.y);
-    m_role->attack();
+    m_role->onTouchBegan(pTouch, pEvent);
 
 	return true;
 }

@@ -16,6 +16,9 @@
     <Filter Include="Classes\Weapon">
       <UniqueIdentifier>{6000b357-bfc5-4f35-89c5-f6236059b371}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\Model">
+      <UniqueIdentifier>{2c8e761f-984d-402d-8c09-de4439266a47}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -75,11 +78,14 @@
     <ClCompile Include="..\Classes\Object\MonsterMushroom.cpp">
       <Filter>Classes\Object</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Utils\BiliBoard.cpp">
-      <Filter>Classes\Utils</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\Utils\B2Handler.cpp">
       <Filter>Classes\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Model\ObjectModel.cpp">
+      <Filter>Classes\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Model\BiliBoard.cpp">
+      <Filter>Classes\Model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -146,11 +152,14 @@
     <ClInclude Include="..\Classes\Object\MonsterMushroom.h">
       <Filter>Classes\Object</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Utils\BiliBoard.h">
-      <Filter>Classes\Utils</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\Utils\B2Handler.h">
       <Filter>Classes\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Model\ObjectModel.h">
+      <Filter>Classes\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Model\BiliBoard.h">
+      <Filter>Classes\Model</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

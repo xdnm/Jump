@@ -4,6 +4,7 @@
 #include "cocos2d.h"
 #include "Box2D/Box2D.h"
 #include "Object/B2CCNode.h"
+#include <algorithm>
 USING_NS_CC;
 using namespace std;
 
@@ -26,33 +27,36 @@ public:
 
 	void putSleepingPool(b2Body *body)
 	{
-		if(body != NULL)
+        vector<b2Body*>::iterator iter = find(m_sleepingPool->begin(), m_sleepingPool->end(), body);
+
+		if(body != NULL && iter == m_sleepingPool->end())
 			m_sleepingPool->push_back(body);
 	}
 	void putDeadPool(b2Body *body)
 	{
-		if(body	!= NULL)
+        vector<b2Body*>::iterator iter = find(m_deadPool->begin(), m_deadPool->end(), body);
+		if(body	!= NULL && iter == m_deadPool->end())
         {
 			m_deadPool->push_back(body);
         }
 	}
     void putActivePool(b2Body *body)
     {
-        if(body != NULL)
+        vector<b2Body*>::iterator iter = find(m_activePool->begin(), m_activePool->end(), body);
+        if(body != NULL && iter == m_activePool->end())
             m_activePool->push_back(body);
     }
     void putJointPool(b2JointDef* jointDef)
     {
-        m_jointPool->push_back(jointDef);
-
-        vector<b2JointDef*>::iterator iter;
-        for(iter = m_jointPool->begin(); iter != m_jointPool->end(); ++iter)
-        {
-
-        }
+        vector<b2JointDef*>::iterator iter = find(m_jointPool->begin(), m_jointPool->end(), jointDef);
+        if(iter == m_jointPool->end())
+            m_jointPool->push_back(jointDef);
+        
     }
     void putDestroyJointPool(b2JointDef *jointDef)
     {
+        vector<b2JointDef*>::iterator iter = find(m_destroyJointPool->begin(), m_destroyJointPool->end(), jointDef);
+
         if(jointDef != NULL)
             m_destroyJointPool->push_back(jointDef);
     }

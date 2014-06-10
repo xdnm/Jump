@@ -2,7 +2,7 @@
 
 ForeSceneManager::ForeSceneManager()
 {
-    m_unitHeight = CCDirector::sharedDirector()->getVisibleSize().height / 2;
+    m_unitHeight = CCDirector::sharedDirector()->getVisibleSize().height / 15;
     m_screenContent = new vector<B2CCNode*>();
 
     m_blockArray = CCArray::create();
@@ -21,7 +21,7 @@ void ForeSceneManager::initBlockArray()
 {
     for(int i = 0; i < 20; i++)
     {
-        RigidBlock *tempBlock = RigidBlock::createRigidBlock(ccp(0, 0),CCSizeMake(50, 20), NULL);
+        RigidBlock *tempBlock = RigidBlock::createRigidBlock(ccp(0, 0),CCSizeMake(120, 40), NULL);
         tempBlock->setAlive(false);
         //tempBlock->autorelease();
         //tempBlock->retain();
@@ -144,14 +144,14 @@ void ForeSceneManager::edgeManage(int height)
 
     int maxHeight;
     if(iter == m_screenContent->begin())
-        maxHeight = height - Edge::s_height/2;
+        maxHeight = height - m_screenSize.height/2;
     else
         maxHeight = (*iter)->getB2NodePostion().y;
 
-    if(maxHeight < height + Edge::s_height/2)
+    if(maxHeight < height + m_screenSize.height/2)
     {
-        RigidEdge* leftedge = RigidEdge::createRigidEdge(ccp(RigidEdge::s_leftX, maxHeight +Edge::s_height + 10), Edge::s_height, NULL);
-        RigidEdge* rightEdge = RigidEdge::createRigidEdge(ccp(RigidEdge::s_rightX, maxHeight +Edge::s_height + 10), Edge::s_height, NULL);
+        RigidEdge* leftedge = RigidEdge::createRigidEdge(ccp(0, maxHeight +m_screenSize.height), m_screenSize.height, NULL);
+        RigidEdge* rightEdge = RigidEdge::createRigidEdge(ccp(m_screenSize.width, maxHeight +m_screenSize.height), m_screenSize.height, NULL);
         m_screenContent->push_back(leftedge);
         m_screenContent->push_back(rightEdge);
         leftedge->retain();

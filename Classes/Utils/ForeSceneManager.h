@@ -43,6 +43,7 @@ private:
     CCArray *m_edgeArray;
     CCSize m_screenSize;
 
+
     vector<B2CCNode*> *m_screenContent;
     int m_unitHeight;
 };

@@ -32,9 +32,9 @@ bool RoleObject::initWithWorld(b2World* world, void *parm)
 			break;
 		}
 
-       
+       m_onTouchDown = false;
         //init the length first, and the face direction
-        m_length = 20.0f;
+        m_length = 50.0f;
         m_Unit = m_length;
         m_faceLeft = true;
 
@@ -53,7 +53,7 @@ bool RoleObject::initWithWorld(b2World* world, void *parm)
 
 		//world init
 		m_world = world;
-		m_position = ccp(80, 300);
+		m_position = ccp(270, 70);
 
         m_bounce = false;
 
@@ -77,20 +77,25 @@ bool RoleObject::initWithWorld(b2World* world, void *parm)
 		m_textureCoords[5] = Vertex2DMake(1.0f, 1.0f);
 		m_texture = cocos2d::CCTextureCache::sharedTextureCache()->addImage("role.png");
         
-        
 		//create the pysical body 
 		createBody(parm);
+
+
+        //init role's model
+        initModel();
 
         //create the weapon and init the unit width of the weapon.
         m_weapon = SwordWeapon::createSword(m_leftHandSprite, m_Unit, m_innerBody, NULL);
         m_leftHandSprite->addChild(m_weapon);
         //this->addChild(m_weapon);
         m_weapon->userdata = this;
+
+        m_model->plusAModel(m_weapon->m_model);
+
         //m_leftHandSprite->setFlipY(true);
   
         //after the weapon attach to role, we can init the role's biliboard
-        buildBiliBoard();
-        m_weapon->m_biliboard = m_biliBoard;
+        
 
         setFaceLeft(false);
         this->scheduleUpdate();
@@ -100,6 +105,17 @@ bool RoleObject::initWithWorld(b2World* world, void *parm)
 	} while (1);
 
 	return ret;
+}
+
+bool RoleObject::initModel()
+{
+    m_model = new ObjectModel();
+    m_model->setStrong(5);
+    m_model->setStrength(5);
+    m_model->setAgility(5);
+    m_model->setFirm(5);
+
+    return true;
 }
 
 void RoleObject::createBody(void *parm)
@@ -147,8 +163,10 @@ void RoleObject::createBody(void *parm)
     m_topBoby->CreateFixture(&fixtureDef);
 
     //create bottom block
+    polyShapeHorizon.SetAsBox((blockLength*2)/PTM_RATIO, blockWidth/PTM_RATIO);
     bodyDef.position = b2Vec2(m_position.x/PTM_RATIO, (m_position.y - m_outRadius)/PTM_RATIO);
     m_bottomBody = m_world->CreateBody(&bodyDef);
+    fixtureDef.filter.groupIndex = 2;
     m_bottomBody->CreateFixture(&fixtureDef);
 
     //create left block
@@ -187,14 +205,26 @@ void RoleObject::createBody(void *parm)
     createDistanceJoint(m_innerBody, m_leftBody, 1.0f, 4.0f);
     createDistanceJoint(m_innerBody, m_rightBody, 1.0f, 4.0f);
 
-    createDistanceJoint(m_topBoby, m_leftBody);
-    createDistanceJoint(m_topBoby, m_rightBody);
+    createDistanceJoint(m_topBoby, m_leftBody, 0.8f, 4.0f);
+    createDistanceJoint(m_topBoby, m_rightBody, 0.8f, 4.0f);
     createDistanceJoint(m_bottomBody, m_rightBody);
     createDistanceJoint(m_bottomBody, m_leftBody);
+    createDistanceJoint(m_leftBody, m_rightBody);
 
     createRevoluteJoint(m_innerBody, m_topBoby, 15.0f);
     createRevoluteJoint(m_innerBody, m_bottomBody, 15.0f);
-    
+
+    //test for create the joints between bottom body and left&right body
+    b2DistanceJointDef distanceJointDef;
+    distanceJointDef.dampingRatio = 1.0f;
+    distanceJointDef.frequencyHz = 4.0f;
+    distanceJointDef.Initialize(m_bottomBody, m_leftBody, m_bottomBody->GetWorldCenter() + b2Vec2(-blockLength*2/PTM_RATIO, 0), m_leftBody->GetWorldCenter());
+    m_world->CreateJoint(&distanceJointDef);
+
+    distanceJointDef.Initialize(m_bottomBody, m_rightBody, m_bottomBody->GetWorldCenter() + b2Vec2(blockLength*2/PTM_RATIO, 0), m_rightBody->GetWorldCenter());
+    m_world->CreateJoint(&distanceJointDef);
+    /*createRevoluteJoint(m_innerBody, m_leftBody, 30.0f);
+    createRevoluteJoint(m_innerBody, m_rightBody, 30.0f);*/
 
     //set userdata of  each part of the body
     m_leftBody->SetUserData((RoleObject*)this);
@@ -206,6 +236,8 @@ void RoleObject::createBody(void *parm)
     //set mass for each part of the body
     B2Helper::Instance()->setMass(m_innerBody, 10);
     B2Helper::Instance()->setMass(m_bottomBody, 2);
+    B2Helper::Instance()->setMass(m_leftBody, 0.1);
+    B2Helper::Instance()->setMass(m_rightBody, 0.1);
 
 }
 
@@ -221,7 +253,7 @@ void RoleObject::createDistanceJoint(b2Body *bodyA, b2Body *bodyB, float dampRat
 	jointDef.dampingRatio = dampRatio;
 
 	m_world->CreateJoint(&jointDef);
-
+   
 }
 void RoleObject::createRevoluteJoint(b2Body *bodyA, b2Body *bodyB, float angle)
 {
@@ -284,6 +316,11 @@ void RoleObject::onCollied(b2Contact *contact, b2Body *bodyOther)
         return ;
 
 	CCNode *otherNode = (CCNode*)(bodyOther->GetUserData());
+    b2Body *selfBody;
+    if(contact->GetFixtureA()->GetBody() == bodyOther)
+        selfBody = contact->GetFixtureA()->GetBody();
+    else
+        selfBody = contact->GetFixtureB()->GetBody();
 	//CCLog("tag %d collied with tag %d", this->getTag(), otherNode == NULL? 0:otherNode->getTag());
 
     //if the othernode is a unset object or the edge object, do nothing to this collision
@@ -291,23 +328,57 @@ void RoleObject::onCollied(b2Contact *contact, b2Body *bodyOther)
         return ;
     else if(otherNode->getTag() == 3)
         return;
-
+    
     //if the role is moving up, ingore this collision
     if(m_innerBody->GetLinearVelocity().y > 0 || m_weapon->isHooked())
     {
-        contact->SetEnabled(false);
+        if(TagHelper::Instance()->isObject(otherNode->getTag(), ON_MONSTOR) )
+        {
+            if(m_bottomBody->GetPosition().y < bodyOther->GetPosition().y)
+            {
+                Monster *monster = dynamic_cast<Monster*>(otherNode);
 
+                monster->attacked(m_model);
 
+                contact->SetEnabled(false);
+            }
+            else
+            {
+                contact->SetEnabled(true);
+            }
+        }
+        else
+        {
+            contact->SetEnabled(false);
+        }
     }
     else if(bodyOther->GetPosition().y > m_bottomBody->GetPosition().y)
     {
         //if role is moving down, but the colliision object is above at the bottom body, ingore this collision.
+        if(TagHelper::Instance()->isObject(otherNode->getTag(), ON_MONSTOR) 
+            && m_bottomBody->GetPosition().y < bodyOther->GetPosition().y)
+        {
+            Monster *monster = dynamic_cast<Monster*>(otherNode);
+
+            monster->attacked(m_model);
+        }
         contact->SetEnabled(false);
     }
     else
     {
         if(TagHelper::Instance()->isObject(otherNode->getTag(), ON_BLOCK))
-            jump(10.0f);
+            jump(20.0f);
+
+        if(TagHelper::Instance()->isObject(otherNode->getTag(), ON_MONSTOR))
+        {
+            
+            Monster *monster = dynamic_cast<Monster*>(otherNode);
+            if(monster->isReady())
+            {
+                jump(10.0f);
+                monster->beenTrampled(m_model);
+            }
+        }
         contact->SetEnabled(true);
     }
 }
@@ -336,13 +407,11 @@ void RoleObject::update(float delta)
     else
         m_rightHandSprite->setRotation(CC_RADIANS_TO_DEGREES(radians) - 90);
 
-
-
     if(m_bounce)
     {
         if(abs(m_innerBody->GetLinearVelocity().y) < 5)
         {
-            m_innerBody->ApplyLinearImpulse(b2Vec2(10.0f, m_innerBody->GetMass() * 30), m_innerBody->GetWorldCenter());
+            m_innerBody->ApplyLinearImpulse(b2Vec2(0.0f, m_innerBody->GetMass() * 30), m_innerBody->GetWorldCenter());
             m_bounce = false;
         }
     }
@@ -351,7 +420,7 @@ void RoleObject::update(float delta)
 bool RoleObject::attack()
 {
     m_weapon->attackAction();
-    //jump(10.0f);
+    //jump(5.0f);
     //setFaceLeft(!m_faceLeft);
     return true;
 }
@@ -385,28 +454,6 @@ void RoleObject::setFaceLeft(bool isFaceLeft)
     }
 }
 
-//biliboard related functions
-void RoleObject::buildBiliBoard()
-{
-    m_biliBoard = new BiliBoard();
-
-    m_biliBoard->m_damege = m_weapon->m_damage;
-    m_biliBoard->m_criticalRate = m_weapon->m_criticalRate;
-    m_biliBoard->m_defence = 0;
-}
-
-BiliBoard* RoleObject::getBiliBoard()
-{
-    return m_biliBoard;
-}
-
-void RoleObject::reciveBiliBoard(BiliBoard *board)
-{
-    CCLog("recive a biliboard:");
-    if(board == NULL)
-        return;
-}
-
 //if weapon attacking area is collied with other body, this function will be called.
 void RoleObject::onAttacking(b2Contact *contact, b2Body* otherBody)
 {
@@ -414,20 +461,28 @@ void RoleObject::onAttacking(b2Contact *contact, b2Body* otherBody)
     if(otherNode == NULL)
         return;
     
-    m_weapon->interationWithOther(contact, otherBody);
+    m_weapon->interationWithOther(contact, otherBody, m_onTouchDown);
 }
 
 bool RoleObject::onTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
 {
+    m_onTouchDown = true;
+    this->jump(5.0f);
+    this->attack();
     return true;
 }
 
 bool RoleObject::onTouchEnded(CCTouch *pTouch, CCEvent *pEvent)
 {
-    if(m_weapon->isHooked())
+    if(m_onTouchDown)
     {
-        m_weapon->endHook();
+        if(m_weapon->isHooked())
+        {
+            m_weapon->endHook();
+        }
     }
+
+    m_onTouchDown = false;
     return true;
 }
 

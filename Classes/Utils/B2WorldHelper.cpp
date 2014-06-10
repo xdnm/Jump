@@ -107,8 +107,10 @@ void B2Helper::bodiesListener(float dt)
 		for (iter = m_deadPool->begin(); iter != m_deadPool->end(); ++iter)
 		{
             if(*iter != NULL)
+            {
 			    m_world->DestroyBody(*iter);
-            *iter = NULL;
+                *iter = NULL;
+            }
 		}
         m_deadPool->clear();
 	}
@@ -130,9 +132,11 @@ void B2Helper::bodiesListener(float dt)
         for(iter = m_jointPool->begin(); iter != m_jointPool->end(); ++iter)
         {
             if(*iter != NULL)
+            {
                 m_world->CreateJoint(*iter);
-
-            *iter = NULL;
+                *iter = NULL;
+            }
+            
         }
         m_jointPool->clear();
     }

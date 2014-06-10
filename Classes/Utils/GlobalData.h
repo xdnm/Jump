@@ -5,6 +5,7 @@
 #define PTM_RATIO 32
 
 extern b2World *G_world;
+#define COCOS2D_DEBUG 1
 
 typedef struct {
 	GLfloat x;

@@ -18,6 +18,8 @@ class RoleObject: public B2CCNode
 public:
 	static RoleObject* CreateRole(b2World* world, void *parm);
 	
+    bool initModel();
+
 	virtual void jump(float massRatio = 1.0f);
 	virtual void onCollied(b2Contact *contact, b2Body *bodyOther);
 
@@ -44,10 +46,6 @@ private:
     void hookAction(b2Body *hookBody, b2Vec2 point);
 
     void setFaceLeft(bool isFaceLeft);
-
-    void buildBiliBoard();
-    BiliBoard* getBiliBoard();
-    void reciveBiliBoard(BiliBoard *board);
 
 public:
     //ccnode for layer to follow or other things
@@ -85,6 +83,9 @@ private:
 
     float m_Unit;
     bool m_faceLeft;
+
+    //touch relatied.
+    bool m_onTouchDown;
 };
 
 #endif;
