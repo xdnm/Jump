@@ -10,6 +10,15 @@ SwordWeapon::~SwordWeapon()
     delete m_wave1;
 }
 
+bool SwordWeapon::initModel()
+{
+    m_model = new ObjectModel();
+    m_model->m_damege = 1;
+    m_model->m_hitRatio = 1.0f;
+
+    return true;
+}
+
 SwordWeapon* SwordWeapon::createSword(CCNode *hand, float unit,b2Body *hookRoleBody, void *parm)
 {
     SwordWeapon *pRet = new SwordWeapon();
@@ -34,7 +43,7 @@ bool SwordWeapon::initWithParm(CCNode *hand, float unit /* = 1.0f */,b2Body *hoo
 
     //testing code for init, I hard code the parm in below region
     m_unit = unit;
-    m_size = CCSizeMake(15, 45);
+    m_size = CCSizeMake(30, 90);
     m_texture = cocos2d::CCTextureCache::sharedTextureCache()->addImage("sword1.png");
     m_wave1 = NULL;
 
@@ -50,7 +59,7 @@ bool SwordWeapon::initWithParm(CCNode *hand, float unit /* = 1.0f */,b2Body *hoo
 
     initActions();
 
-    this->setScale(15/m_texture->getContentSize().width);
+    this->setScale(m_size.width/m_texture->getContentSize().width);
 
     m_damage = 1;
     m_criticalRate = 0.05f;
@@ -76,6 +85,11 @@ bool SwordWeapon::hook(b2Contact *contact, b2Body *otherBody)
     if(m_isHooked)
         return false;
 
+    CCLog("began hook!");
+    if(m_onAttacking)
+        endDamege();
+    //endDamege();
+    //endAttack();
     m_isHooked = true;
     m_hookedBody = otherBody;
     
@@ -89,10 +103,12 @@ bool SwordWeapon::hook(b2Contact *contact, b2Body *otherBody)
     b2WorldManifold *maniFold = new b2WorldManifold();
     contact->GetWorldManifold(maniFold);
     m_jointDef->collideConnected = true;
-    m_jointDef->dampingRatio = 0.0f;
+    m_jointDef->dampingRatio = 0.1f;
     m_jointDef->frequencyHz = 4.0f;
     m_jointDef->Initialize(m_hookRoleBody, otherBody, m_hookRoleBody->GetWorldCenter(), maniFold->points[0]);
     B2Helper::Instance()->putJointPool(m_jointDef);
+
+    this->schedule(schedule_selector(SwordWeapon::updateWeapon));
     delete maniFold;
     return true;
 }
@@ -101,6 +117,7 @@ bool SwordWeapon::endHook()
     if(!m_isHooked)
         return false;
     
+    CCLog("end hook!");
     m_isHooked = false;
     B2Helper::Instance()->putDestroyJointPool(m_jointDef);
 
@@ -111,6 +128,7 @@ bool SwordWeapon::endHook()
 
     m_hand->addChild(this);
     
+    this->unschedule(schedule_selector(SwordWeapon::updateWeapon));
     return true;
 }
 
@@ -261,6 +279,8 @@ void SwordWeapon::beginDamege()
 
 void SwordWeapon::endDamege()
 {
+    if(!m_onAttacking)
+        return;
     CCLog("end damege");
     this->unschedule(schedule_selector(SwordWeapon::updateAttackArea));
     if(m_attackAreaBody != NULL)
@@ -272,20 +292,22 @@ void SwordWeapon::endDamege()
 
 void SwordWeapon::update(float delta)
 {
+    /*          CCLog("sword position : (%f, %f)", getPositionX(), getPositionY());
     if(m_isHooked)
     {
-        CCPoint anchorPoint = ccp(m_hookRoleBody->GetPosition().x * PTM_RATIO, m_hookRoleBody->GetPosition().y *PTM_RATIO);
-        CCPoint hookedPoint = ccp(m_hookedBody->GetPosition().x * PTM_RATIO, m_hookedBody->GetPosition().y * PTM_RATIO);
+    CCPoint anchorPoint = ccp(m_hookRoleBody->GetPosition().x * PTM_RATIO, m_hookRoleBody->GetPosition().y *PTM_RATIO);
+    CCPoint hookedPoint = ccp(m_hookedBody->GetPosition().x * PTM_RATIO, m_hookedBody->GetPosition().y * PTM_RATIO);
 
-        this->setPosition(anchorPoint);
-        float angle = ccpAngle(hookedPoint - anchorPoint, ccp(0, 1));
 
-        if(anchorPoint.x > hookedPoint.x)
-            angle = -angle;
-        
-        this->setRotation(CC_RADIANS_TO_DEGREES(angle));
+    this->setPosition(anchorPoint);
+    float angle = ccpAngle(hookedPoint - anchorPoint, ccp(0, 1));
 
-    }
+    if(anchorPoint.x > hookedPoint.x)
+    angle = -angle;
+
+    this->setRotation(CC_RADIANS_TO_DEGREES(angle));
+
+    }*/
 }
 
 void SwordWeapon::updateAttackArea(float delta)
@@ -299,7 +321,26 @@ void SwordWeapon::updateAttackArea(float delta)
     }
 }
 
-BiliBoard* SwordWeapon::interationWithOther(b2Contact *contact, b2Body* otherBody)
+void SwordWeapon::updateWeapon(float dt)
+{
+    if(m_isHooked)
+    {
+        CCPoint anchorPoint = ccp(m_hookRoleBody->GetPosition().x * PTM_RATIO, m_hookRoleBody->GetPosition().y *PTM_RATIO);
+        CCPoint hookedPoint = ccp(m_hookedBody->GetPosition().x * PTM_RATIO, m_hookedBody->GetPosition().y * PTM_RATIO);
+
+
+        this->setPosition(anchorPoint);
+        float angle = ccpAngle(hookedPoint - anchorPoint, ccp(0, 1));
+
+        if(anchorPoint.x > hookedPoint.x)
+            angle = -angle;
+
+        this->setRotation(CC_RADIANS_TO_DEGREES(angle));
+
+    }
+}
+
+BiliBoard* SwordWeapon::interationWithOther(b2Contact *contact, b2Body* otherBody, bool onTouching)
 {
     CCNode *othernode = static_cast<CCNode*>(otherBody->GetUserData());
 
@@ -309,9 +350,10 @@ BiliBoard* SwordWeapon::interationWithOther(b2Contact *contact, b2Body* otherBod
     {
         CCLog("role interact with tag: %d", othernode->getTag());
 
-        if(TagHelper::Instance()->isObject(othernode->getTag(), ON_BLOCK))
+        if(TagHelper::Instance()->isObject(othernode->getTag(), ON_BLOCK) && isHooked() == false)
         {
-            hook(contact, otherBody);
+            if(onTouching)
+                hook(contact, otherBody);
         }
     }
 

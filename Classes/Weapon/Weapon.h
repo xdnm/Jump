@@ -6,6 +6,7 @@
 #include "textures/CCTexture2D.h"
 #include "Utils/TagHelper.h"
 #include "Utils/B2WorldHelper.h"
+#include "Model/BiliBoard.h"
 //#include "Object/RoleObject.h"
 //#include "Object/Monster.h"
 using namespace std;
@@ -89,6 +90,7 @@ public:
 
     ~Weapon();
 
+    virtual bool initModel(){return true;};
     void setUnit(float parm);
  
 
@@ -104,7 +106,7 @@ public:
    
     void createActions();
 
-    virtual BiliBoard *interationWithOther(b2Contact *contact, b2Body* otherBody){return NULL;};
+    virtual BiliBoard *interationWithOther(b2Contact *contact, b2Body* otherBody, bool onTouching){return NULL;};
    
 
     virtual bool initActions(){return false;};
@@ -131,6 +133,8 @@ public:
     {
         return m_isHooked;
     }
+
+    virtual void updateWeapon(float dt){};
 protected:
     inline CCPoint  DefaultPositon();
     inline float        DefaultRotation();
@@ -145,6 +149,8 @@ protected:
 public:
     int m_damage;
     float m_criticalRate;
+
+    ObjectModel *m_model;
 
     //pointer to a biliboard which was passed from the role;
     BiliBoard *m_biliboard;

@@ -8,6 +8,7 @@ class SwordWeapon : public Weapon
 public:
     ~SwordWeapon();
     
+    bool initModel();
     static SwordWeapon* createSword(CCNode *hand, float unit, b2Body *hookRoleBody, void *parm);
 
     bool initWithParm(CCNode *hand, float unit,b2Body *hookRoleBody,  void *parm = NULL);
@@ -28,8 +29,9 @@ public:
     void updateAttackArea(float delta);
 
     void update(float delta);
+    void updateWeapon(float dt);
 
-    BiliBoard* interationWithOther(b2Contact *contact, b2Body* otherBody);
+    BiliBoard* interationWithOther(b2Contact *contact, b2Body* otherBody, bool onTouching);
 private:
     SwordWeapon();
     b2Body *m_hookRoleBody;

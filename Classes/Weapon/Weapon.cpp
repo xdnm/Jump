@@ -10,6 +10,8 @@ Weapon::Weapon()
     m_onAttacking = false;
     m_isHooked = false;
 
+    m_model = new ObjectModel();
+
     //B2Helper::Instance()->getWorld()->SetContactListener((b2ContactListener*)(this));
     this->setTag(TagHelper::Instance()->getTag(ON_WEAPON));
 
