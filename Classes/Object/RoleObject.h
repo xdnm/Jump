@@ -11,13 +11,19 @@
 #include "Utils/TagHelper.h"
 #include "Weapon/SwordWeapon.h"
 #include "Object/Monster.h"
+#include "Model/ObjectModel.h"
 USING_NS_CC;
 
 class RoleObject: public B2CCNode
 {
 public:
 	static RoleObject* CreateRole(b2World* world, void *parm);
+    ~RoleObject();
 	
+    /**After all the components was initialized, we can init the model in this function.
+        And we also provide this B2Node with enough information,like mainBody, visualNode.
+        At last we need to make a reference between model and model-hold-b2node.
+    */
     bool initModel();
 
 	virtual void jump(float massRatio = 1.0f);
@@ -51,6 +57,7 @@ public:
     //ccnode for layer to follow or other things
     CCNode *m_node;
 
+    ObjectModel *m_model;
 
 protected:
 private:

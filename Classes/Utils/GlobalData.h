@@ -7,6 +7,9 @@
 extern b2World *G_world;
 #define COCOS2D_DEBUG 1
 
+#define SAFE_DELETE(ptr) if(ptr != NULL) {delete ptr;ptr = NULL;}
+
+
 typedef struct {
 	GLfloat x;
 	GLfloat y;
@@ -31,4 +34,6 @@ enum GameTags
 	TAGS_BLOCK_MAX = 200,
 
 };
+
+
 #endif

@@ -7,6 +7,7 @@
 #include "Utils/TagHelper.h"
 #include "Utils/B2WorldHelper.h"
 #include "Model/BiliBoard.h"
+#include "Model/ObjectModel.h"
 //#include "Object/RoleObject.h"
 //#include "Object/Monster.h"
 using namespace std;
@@ -150,7 +151,10 @@ public:
     int m_damage;
     float m_criticalRate;
 
+    //m_model holds the this weapon's model data;
     ObjectModel *m_model;
+    //m_roleModel is pointer point to the role's model data.
+    ObjectModel *m_roleModel;
 
     //pointer to a biliboard which was passed from the role;
     BiliBoard *m_biliboard;

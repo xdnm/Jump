@@ -13,8 +13,10 @@ SwordWeapon::~SwordWeapon()
 bool SwordWeapon::initModel()
 {
     m_model = new ObjectModel();
-    m_model->m_damege = 1;
-    m_model->m_hitRatio = 1.0f;
+    m_model->d_damege = 10;
+    m_model->d_defence = 5;
+    m_model->m_strength = 5;
+    m_model->m_strong = 5;
 
     return true;
 }
@@ -73,6 +75,7 @@ bool SwordWeapon::initWithParm(CCNode *hand, float unit /* = 1.0f */,b2Body *hoo
     this->setPosition(m_defaultPosiion);
     this->setRotation(m_defaultRotation);
 
+    initModel();
 
     this->scheduleUpdate();
     
@@ -260,7 +263,7 @@ void SwordWeapon::beginDamege()
     b2FixtureDef fixtureDef;
     fixtureDef.shape = &(m_wave1->attackShape);
     fixtureDef.filter.categoryBits = BM_WEAPON;
-    fixtureDef.filter.maskBits = BM_EDGE | BM_BLOCK;
+    fixtureDef.filter.maskBits = BM_EDGE | BM_BLOCK | BM_MONSTOR;
 
     b2BodyDef bodyDef;
     bodyDef.position = b2Vec2(point.x/PTM_RATIO, point.y/PTM_RATIO);
@@ -350,10 +353,16 @@ BiliBoard* SwordWeapon::interationWithOther(b2Contact *contact, b2Body* otherBod
     {
         CCLog("role interact with tag: %d", othernode->getTag());
 
-        if(TagHelper::Instance()->isObject(othernode->getTag(), ON_BLOCK) && isHooked() == false)
+        if(TagHelper::Instance()->isObject(othernode->getTag(), ON_BLOCK))
         {
             if(onTouching)
                 hook(contact, otherBody);
+        }
+        else if(TagHelper::Instance()->isObject(othernode->getTag(), ON_MONSTOR))
+        {
+            Monster *monter = dynamic_cast<Monster*>(othernode);
+            monter->beenAttacked(m_roleModel);
+    
         }
     }
 

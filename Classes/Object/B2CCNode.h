@@ -3,7 +3,6 @@
 
 #include "cocos2d.h"
 #include "Box2D/Box2D.h"
-#include "Model/ObjectModel.h"
 USING_NS_CC;
 
 class B2CCNode : public CCNode
@@ -14,10 +13,14 @@ public:
         m_position = ccp(0, 0);
         m_size = CCSizeMake(0, 0);
         m_isAlive = false;
-
-        m_model = NULL;
     }
 
+    ~B2CCNode()
+    {
+        //m_visiableNode->release();
+    }
+
+    /**after all the components was initialized, we can init the model in this function*/
     virtual bool initModel(){return true;};
     virtual void setAlive(bool flag){};
 
@@ -44,11 +47,13 @@ public:
 
     virtual void onCollied(b2Contact* contact, b2Body *bodyOther) {};
 public:
-        ObjectModel *m_model;
+        //main body, we can manipulate it to move this B2CCNode
+        b2Body *m_mainBody;
+        CCSize m_size;
+        CCSprite *m_visiableNode;
 
 protected:
     CCPoint m_position;
-    CCSize m_size;
     bool m_isAlive;
 
 

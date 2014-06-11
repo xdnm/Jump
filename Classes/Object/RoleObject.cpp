@@ -4,6 +4,12 @@ RoleObject::RoleObject()
 {
     this->setTag(TagHelper::Instance()->getTag(ON_ROLE));
 }
+RoleObject::~RoleObject()
+{
+    if(m_model != NULL)
+        delete m_model;
+}
+
 RoleObject* RoleObject::CreateRole(b2World* world, void *parm)
 {
     RoleObject *pRet = new RoleObject();
@@ -53,13 +59,10 @@ bool RoleObject::initWithWorld(b2World* world, void *parm)
 
 		//world init
 		m_world = world;
-		m_position = ccp(270, 70);
+		m_position = ccp(100, 70);
 
         m_bounce = false;
 
-        //body sprite init
-        m_node = CCNode::create();
-        this->addChild(m_node);
         m_leftHandSprite = CCSprite::create();
         m_rightHandSprite = CCSprite::create();
         //m_leftHandSprite->setScale(30/m_leftHandSprite->getContentSize().width);
@@ -81,7 +84,6 @@ bool RoleObject::initWithWorld(b2World* world, void *parm)
 		createBody(parm);
 
 
-        //init role's model
         initModel();
 
         //create the weapon and init the unit width of the weapon.
@@ -91,6 +93,7 @@ bool RoleObject::initWithWorld(b2World* world, void *parm)
         m_weapon->userdata = this;
 
         m_model->plusAModel(m_weapon->m_model);
+        m_weapon->m_roleModel = m_model;
 
         //m_leftHandSprite->setFlipY(true);
   
@@ -100,7 +103,9 @@ bool RoleObject::initWithWorld(b2World* world, void *parm)
         setFaceLeft(false);
         this->scheduleUpdate();
         //B2Helper::Instance()->getWorld()->SetContactListener(this);
-        
+
+        //after all the components was initialized, we can init the model in this function
+
 		break;
 	} while (1);
 
@@ -110,11 +115,26 @@ bool RoleObject::initWithWorld(b2World* world, void *parm)
 bool RoleObject::initModel()
 {
     m_model = new ObjectModel();
+    m_model->d_damege = 5;
+    m_model->d_defence = 10;
+    m_model->d_health = 10;
+    m_model->d_hitRatio = 5;
+    m_model->d_parry = 5;
+   
+
     m_model->setStrong(5);
     m_model->setStrength(5);
     m_model->setAgility(5);
     m_model->setFirm(5);
 
+    //body sprite init
+    m_visiableNode = CCSprite::create();
+    this->addChild(m_visiableNode);
+    m_visiableNode->initWithFile("shield.png");
+
+    this->m_mainBody = m_innerBody;
+    m_model->m_B2Node = this;
+   
     return true;
 }
 
@@ -385,7 +405,7 @@ void RoleObject::onCollied(b2Contact *contact, b2Body *bodyOther)
 
 void RoleObject::update(float delta)
 {
-    m_node->setPosition(m_innerBody->GetPosition().x * PTM_RATIO, m_innerBody->GetPosition().y * PTM_RATIO);
+    m_visiableNode->setPosition(ccp(m_innerBody->GetPosition().x * PTM_RATIO, m_innerBody->GetPosition().y * PTM_RATIO));
 
     m_position = ccp(m_innerBody->GetPosition().x * PTM_RATIO, m_innerBody->GetPosition().y * PTM_RATIO);
 
@@ -430,6 +450,7 @@ void RoleObject::hookAction(b2Body *hookedBody, b2Vec2 point)
     //plus the hook point
     CCPoint hookPoint = m_weapon->getWeaponPosition();
     
+    //TODO Delete jointDef.
     b2DistanceJointDef *jointDef = new b2DistanceJointDef();
     jointDef->collideConnected = true;
     jointDef->dampingRatio = 0.0f;

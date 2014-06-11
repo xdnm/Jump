@@ -7,11 +7,17 @@ ObjectModel::ObjectModel()
     m_agility = 0;
     m_firm = 0;
 
-    m_health = 10;
-    m_damege = 10;
-    m_defence = 10;
-    m_parry = 0.05f;
-    m_hitRatio = 1;
+    d_health = 0;
+    d_damege = 0;
+    d_defence = 0;
+    d_parry = 0;
+    d_hitRatio = 0;
+
+    m_health = 0;
+    m_damege = 0;
+    m_defence = 0;
+    m_parry = 0;
+    m_hitRatio = 0;
 };
 ObjectModel::~ObjectModel()
 {
@@ -29,20 +35,26 @@ void ObjectModel::selfInit()
 
 void ObjectModel::build()
 {
-    m_damege = m_damege * m_strength / 100;
-    m_defence = m_defence * m_strong / 100;
-    m_parry = m_parry * m_agility / 100;
-    m_hitRatio = m_hitRatio * m_agility / 100;
-    m_health = m_health * m_strong / 100;
+    /*m_damege = d_damege + d_damege * ((float)m_strength / 100);
+    m_defence = d_defence + d_defence * ((float)m_strong / 100);
+    m_parry = d_parry + d_parry * ((float)m_agility / 100);
+    m_hitRatio = d_hitRatio + d_hitRatio * ((float)m_agility / 100);
+    m_health = d_health +  d_health * ((float)m_strong / 100);*/
+
+    m_damege = d_damege + m_strength / 2 + m_strong / 6;
+    m_defence = d_defence + m_strong / 2;
+    m_parry = d_parry + m_agility / 2;
+    m_hitRatio = d_hitRatio + m_agility / 2;
+    m_health = d_health + m_firm / 2 + m_strong / 6;
 }
 
 void ObjectModel::plusAModel(ObjectModel *otherModel)
 {
-    m_health     += otherModel->m_health;
-    m_damege  += otherModel->m_damege;
-    m_defence  += otherModel->m_defence;
-    m_parry       +=otherModel->m_parry;
-    m_hitRatio   += otherModel->m_hitRatio;
+    d_health     += otherModel->d_health;
+    d_damege  += otherModel->d_damege;
+    d_defence  += otherModel->d_defence;
+    d_parry       +=otherModel->d_parry;
+    d_hitRatio   += otherModel->d_hitRatio;
 
     m_strength  += otherModel->m_strength;
     m_strong     += otherModel->m_strong;
@@ -60,6 +72,7 @@ void ObjectModel::beenAttackWithModel(ObjectModel *otherModel)
     damege = damege > 0 ? damege : 1;
 
     m_health -= damege;
+    CCLOG("damege: %d, health : %d", damege, m_health);
 }
 
 bool ObjectModel::checkIsDead()

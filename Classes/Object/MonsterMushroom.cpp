@@ -19,8 +19,6 @@ MonsterMushroom::~MonsterMushroom()
     if(m_bottomBody != NULL)
         B2Helper::Instance()->putDeadPool(m_bottomBody);
 
-    if(m_model != NULL)
-        delete m_model;
 }
 
 MonsterMushroom* MonsterMushroom::createMushroom(CCPoint position, CCSize size, void *parm)
@@ -61,8 +59,11 @@ bool MonsterMushroom::initMushroom(CCPoint position, CCSize size, void *parm)
 
 bool MonsterMushroom::initModel()
 {
-    m_model = new ObjectModel();
-    
+    if(m_model == NULL)
+        m_model = new ObjectModel();
+    m_model->m_damege = 10;
+    m_model->m_defence = 10;
+    m_model->m_health = 51;
     return true;
 }
 bool MonsterMushroom::createBody()
@@ -151,11 +152,19 @@ bool MonsterMushroom::isReady()
 bool MonsterMushroom::attacked(ObjectModel *model)
 {
     CCLOG("tag %d attacked role!", this->getTag());
+    //model->m_B2Node->m_mainBody->ApplyForce(b2Vec2(100.0f, 0), model->m_B2Node->m_mainBody));
     return true;
 }
 
 bool MonsterMushroom::beenTrampled(ObjectModel *model)
 {
     CCLOG("tag : %d been trampled", this->getTag());
+    return true;
+}
+
+bool MonsterMushroom::beenAttacked(ObjectModel *model)
+{
+    CCLOG("tag %d been attaced!", this->getTag());
+    this->m_model->beenAttackWithModel(model);
     return true;
 }

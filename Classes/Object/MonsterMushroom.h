@@ -13,6 +13,7 @@ public:
 
     bool attacked(ObjectModel *model);
     bool beenTrampled(ObjectModel *model);
+    bool beenAttacked(ObjectModel *model);
     
     void draw();
 

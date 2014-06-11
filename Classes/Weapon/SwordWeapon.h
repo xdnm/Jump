@@ -2,6 +2,7 @@
 #define __SWORD_WEAPON__
 
 #include "Weapon/Weapon.h"
+#include "Object/Monster.h"
 
 class SwordWeapon : public Weapon
 {

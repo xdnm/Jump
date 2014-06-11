@@ -3,11 +3,12 @@
 Monster::Monster()
 {
     B2CCNode::init();
+    m_model = new ObjectModel();
 }
 
 Monster::~Monster()
 {
-
+    delete m_model;
 }
 
 //attacking collied will be handled in the Weapon class, not in B2WorldHelper.
