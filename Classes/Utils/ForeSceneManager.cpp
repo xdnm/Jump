@@ -13,8 +13,28 @@ ForeSceneManager::ForeSceneManager()
 
     m_screenSize = CCDirector::sharedDirector()->getVisibleSize();
 
+    rapidxml::file<> fdoc(CCFileUtils::sharedFileUtils()->fullPathForFilename("Xmls/Scene.xml").c_str());
+    rapidxml::xml_document<> SceneDoc;
+    SceneDoc.parse<0>(fdoc.data());
+
+    xml_node<> *node = SceneDoc.first_node();
+    xml_node<> *node1 = node->first_node();
+    xml_attribute<char> *attr = node1->first_attribute("name");
+    attr->value();
+    
     initBlockArray();
     initEdgeArray();
+}
+
+void ForeSceneManager::createNewScene(char *SceneName)
+{
+    
+}
+void ForeSceneManager::deleteAll()
+{
+    SAFE_DELETE(m_screenContent);
+    m_blockArray->release();
+    m_edgeArray->release();
 }
 
 void ForeSceneManager::initBlockArray()
@@ -99,7 +119,8 @@ void ForeSceneManager::blocksManage(int height)
         {
             int xPosition = rand()%(int)(m_screenSize.width - tempObject->getB2NodeSize().width) + tempObject->getB2NodeSize().width / 2;
             int yPosition = maxHeight + (rand()%4 + 1)*m_unitHeight;
-            tempObject->setBlockPosition(ccp(xPosition, yPosition));
+            //tempObject->setBlockPosition(ccp(xPosition, yPosition));
+            tempObject->setB2NodePostion(ccp(xPosition, yPosition));
             m_layer->addChild((CCNode*)tempObject);
 
             m_screenContent->push_back(tempObject);
@@ -174,4 +195,23 @@ void ForeSceneManager::edgeManage(int height)
 void ForeSceneManager::monstorManage(int height)
 {
 
+}
+
+B2CCNode *ForeSceneManager::nameProject(char *name)
+{
+    B2CCNode *pRet = NULL;
+    do 
+    {
+        if(strcmp(name, "Mushroom"))
+        {
+            //pRet = MonsterMushroom::createMushroom(m_layer, ccp())
+            break;
+        }
+        else if(strcmp(name, "RigidBlock"))
+        {
+            //pRet = RigidBlock::createRigidBlock(ccp(0, 0), )
+        }
+    } while (0);
+
+    return pRet;
 }

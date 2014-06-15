@@ -3,7 +3,7 @@
 #include "Utils/TagHelper.h"
 #include "Object/RigidBlock.h"
 #include "Object/RigidEdge.h"
-
+#include "Utils/RapidXml.h"
 USING_NS_CC;
 
 class ForeSceneManager : CCObject
@@ -24,6 +24,11 @@ public:
 
     void generateBlocks(int layyerPositionY);
 
+    /**create a new Scene with a name, this scene could be config in Xmls/Scene.xml*/
+    void createNewScene(char *SceneName);
+    /**Delete all the contents in the pools, when we change the forescene we can use this function*/
+    void deleteAll();
+
 private:
     ForeSceneManager();
 
@@ -37,6 +42,8 @@ private:
 
     B2CCNode* getTopObject(int tag);
     B2CCNode* getBottomObject(int tag);
+
+    B2CCNode* nameProject(char *name);
 private:
     CCLayer *m_layer;
     CCArray *m_blockArray;
