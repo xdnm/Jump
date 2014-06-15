@@ -72,6 +72,8 @@ void ObjectModel::beenAttackWithModel(ObjectModel *otherModel)
     damege = damege > 0 ? damege : 1;
 
     m_health -= damege;
+    
+    m_B2Node->createDamegeNum(ccp(0, 0), damege);
     CCLOG("damege: %d, health : %d", damege, m_health);
 }
 

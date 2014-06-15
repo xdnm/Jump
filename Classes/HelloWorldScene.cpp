@@ -14,7 +14,7 @@ CCScene* HelloWorld::scene()
     // add layer as a child to scene
     scene->addChild(layer);
 
-
+    
 	
     // return the scene
     return scene;
@@ -84,7 +84,7 @@ bool HelloWorld::init()
     flags += b2Draw::e_jointBit;
 	debugDrawFlag->SetFlags(flags);
 	B2Helper::Instance()->setWorld(m_world);
-	
+
     //--------------end init world----------------------
 
 	b2BodyDef groundBodyDef;
@@ -128,6 +128,7 @@ bool HelloWorld::init()
 	//--------------set role----------------------------
 	m_role = RoleObject::CreateRole(m_world, NULL);
 	this->addChild(m_role, 10);
+    m_role->createDamegeNum(ccp(0, 100), 1000);
 	//--------------end set role------------------------
 
 
@@ -142,6 +143,7 @@ bool HelloWorld::init()
         height += 100;
     }
 
+
     //RigidEdge *edge = RigidEdge::createRigidEdge(ccp(100, 0), 100, NULL);
     //this->addChild((CCNode*)edge);
 
@@ -152,11 +154,12 @@ bool HelloWorld::init()
     //block->setAlive(true);
     //this->addChild((CCNode *)block);
 
-    MonsterMushroom *mush = MonsterMushroom::createMushroom(ccp(200, 200), CCSizeMake(100, 100), NULL);
+    MonsterMushroom *mush = MonsterMushroom::createMushroom(this, ccp(200, 200), CCSizeMake(100, 100), NULL);
     this->addChild((CCNode*)mush);
     
     //body->ApplyForce(b2Vec2(10.0f, 0), body->GetWorldCenter());
     //body->ApplyForce(b2Vec2(0, body->GetMass() * gravity.Length()) , body->GetWorldCenter());
+
 	//--------------end test region--------------------
 
 

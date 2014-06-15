@@ -17,12 +17,14 @@ public:
 
     ~B2CCNode()
     {
+        //this == NULL;
         //m_visiableNode->release();
     }
 
     /**after all the components was initialized, we can init the model in this function*/
     virtual bool initModel(){return true;};
     virtual void setAlive(bool flag){};
+    virtual void onB2PositionChanged(){};
 
     bool inline isAlive()
     {
@@ -38,6 +40,7 @@ public:
     {
         m_position = point;
         setAlive(true);
+        onB2PositionChanged();
     }
 
     CCSize getB2NodeSize()
@@ -45,12 +48,15 @@ public:
         return m_size;
     }
 
+    /**create a demage num on this B2CCNode , point is the self coordinate point*/
+    void createDamegeNum(CCPoint point, int num, bool isCritical = false, float dur = 1.0f);
+    void deleteDamegeNum(CCNode *numNode);
     virtual void onCollied(b2Contact* contact, b2Body *bodyOther) {};
 public:
         //main body, we can manipulate it to move this B2CCNode
         b2Body *m_mainBody;
         CCSize m_size;
-        CCSprite *m_visiableNode;
+        CCNode *m_visiableNode;
 
 protected:
     CCPoint m_position;

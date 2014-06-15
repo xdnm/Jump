@@ -7,9 +7,9 @@ public:
 
     bool initModel();
 
-    static MonsterMushroom *createMushroom(CCPoint position, CCSize size, void *parm);
+    static MonsterMushroom *createMushroom(CCLayer *layer, CCPoint position, CCSize size, void *parm);
 
-    bool initMushroom(CCPoint position, CCSize size, void *parm);
+    bool initMushroom(CCLayer *layer, CCPoint position, CCSize size, void *parm);
 
     bool attacked(ObjectModel *model);
     bool beenTrampled(ObjectModel *model);

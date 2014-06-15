@@ -21,11 +21,11 @@ MonsterMushroom::~MonsterMushroom()
 
 }
 
-MonsterMushroom* MonsterMushroom::createMushroom(CCPoint position, CCSize size, void *parm)
+MonsterMushroom* MonsterMushroom::createMushroom(CCLayer *layer, CCPoint position, CCSize size, void *parm)
 {
     MonsterMushroom *pRet = new MonsterMushroom();
 
-    if(pRet != NULL && pRet->initMushroom(position, size, parm))
+    if(pRet != NULL && pRet->initMushroom(layer, position, size, parm))
     {
         pRet->autorelease();
         return pRet;
@@ -38,8 +38,9 @@ MonsterMushroom* MonsterMushroom::createMushroom(CCPoint position, CCSize size, 
     }
 }
 
-bool MonsterMushroom::initMushroom(CCPoint position, CCSize size, void *parm)
+bool MonsterMushroom::initMushroom(CCLayer *layer, CCPoint position, CCSize size, void *parm)
 {
+    m_layer = layer;
     m_position = position;
     m_size = size;
     this->setPosition(position);
@@ -64,6 +65,11 @@ bool MonsterMushroom::initModel()
     m_model->m_damege = 10;
     m_model->m_defence = 10;
     m_model->m_health = 51;
+
+    this->m_mainBody = m_topBody;
+    this->m_visiableNode = this;
+
+    m_model->m_B2Node = this;
     return true;
 }
 bool MonsterMushroom::createBody()
@@ -153,12 +159,24 @@ bool MonsterMushroom::attacked(ObjectModel *model)
 {
     CCLOG("tag %d attacked role!", this->getTag());
     //model->m_B2Node->m_mainBody->ApplyForce(b2Vec2(100.0f, 0), model->m_B2Node->m_mainBody));
+
+    B2CCNode *node = model->m_B2Node;
+    float force = 4.0f;
+    if(node->getB2NodePostion().x > m_position.x)
+        node->m_mainBody->ApplyLinearImpulse(b2Vec2(force, force/2), node->m_mainBody->GetWorldCenter());
+    else
+        node->m_mainBody->ApplyLinearImpulse(b2Vec2(-force, force/2), node->m_mainBody->GetWorldCenter());
+
+    model->beenAttackWithModel(m_model);
     return true;
 }
 
 bool MonsterMushroom::beenTrampled(ObjectModel *model)
 {
     CCLOG("tag : %d been trampled", this->getTag());
+    this->m_model->beenAttackWithModel(model);
+    this->checkHealth();
+
     return true;
 }
 
@@ -166,5 +184,6 @@ bool MonsterMushroom::beenAttacked(ObjectModel *model)
 {
     CCLOG("tag %d been attaced!", this->getTag());
     this->m_model->beenAttackWithModel(model);
+    this->checkHealth();
     return true;
 }

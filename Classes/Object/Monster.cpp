@@ -30,3 +30,16 @@ void Monster::onCollied(b2Contact* contact, b2Body *bodyOther)
 
     return;
 }
+
+bool Monster::checkHealth()
+{
+    if(m_model->m_health <= 0)
+    {
+        CCLOG("monter tag: %d is dead!", this->getTag());
+        m_layer->removeChild(this);
+        return true;
+    }
+    return false;
+}
+
+

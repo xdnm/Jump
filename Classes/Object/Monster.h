@@ -19,14 +19,17 @@ public:
 
     virtual bool beenTrampled(ObjectModel *model){ return true; };
     virtual bool attacked(ObjectModel *model){return true;};
+    //bool subAttacked(ObjectModel *model);
     virtual bool beenHooked(ObjectModel *model){return true;};
     virtual bool beenAttacked(ObjectModel *model){return true;};
 
     virtual void onCollied(b2Contact* contact, b2Body *bodyOther);
     virtual bool isReady()=0;
-   
+    
+    bool checkHealth();
 public:
     ObjectModel *m_model;
+    CCLayer *m_layer;
 };
 
 #endif
