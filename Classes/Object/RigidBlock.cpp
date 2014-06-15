@@ -67,7 +67,15 @@ bool RigidBlock::setBlockPosition(cocos2d::CCPoint position)
 
 	m_polyBody->SetTransform(b2Vec2(m_position.x/PTM_RATIO, m_position.y/PTM_RATIO), 0.0f);
 
-	return true;
+    return true;
+}
+
+void RigidBlock::onB2PositionChanged()
+{
+    setAlive(true);
+
+    m_polyBody->SetTransform(b2Vec2(m_position.x/PTM_RATIO, m_position.y/PTM_RATIO), 0.0f);
+
 }
 
 void RigidBlock::interationWithOther(b2Body* otherBody)

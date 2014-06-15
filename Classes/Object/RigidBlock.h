@@ -17,6 +17,9 @@ public:
 	void setAlive(bool flag);
 	bool setBlockPosition(cocos2d::CCPoint position);
 	void interationWithOther(b2Body* otherBody);
+
+    /**this function will be called when we user setB2NodePostion to change the position*/
+    void onB2PositionChanged();
 	
 	void draw();
 
