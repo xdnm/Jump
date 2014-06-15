@@ -53,6 +53,9 @@ private:
 
     void setFaceLeft(bool isFaceLeft);
 
+    void beenAttacked(Monster *monster);
+    bool isProtected();
+    void setUnProtected();
 public:
     //ccnode for layer to follow or other things
     CCNode *m_node;
@@ -93,6 +96,8 @@ private:
 
     //touch relatied.
     bool m_onTouchDown;
+
+    bool m_isProtected;
 };
 
 #endif;

@@ -104,8 +104,7 @@ bool RoleObject::initWithWorld(b2World* world, void *parm)
         this->scheduleUpdate();
         //B2Helper::Instance()->getWorld()->SetContactListener(this);
 
-        //after all the components was initialized, we can init the model in this function
-
+        m_isProtected = false;
 		break;
 	} while (1);
 
@@ -130,7 +129,6 @@ bool RoleObject::initModel()
     //body sprite init
     m_visiableNode = CCSprite::create();
     this->addChild(m_visiableNode);
-    m_visiableNode->initWithFile("shield.png");
 
     this->m_mainBody = m_innerBody;
     m_model->m_B2Node = this;
@@ -357,8 +355,8 @@ void RoleObject::onCollied(b2Contact *contact, b2Body *bodyOther)
             if(m_bottomBody->GetPosition().y < bodyOther->GetPosition().y)
             {
                 Monster *monster = dynamic_cast<Monster*>(otherNode);
-
-                monster->attacked(m_model);
+                beenAttacked(monster);
+                
 
                 contact->SetEnabled(false);
             }
@@ -475,6 +473,19 @@ void RoleObject::setFaceLeft(bool isFaceLeft)
     }
 }
 
+void RoleObject::beenAttacked(Monster *monster)
+{
+    if(isProtected() == false)
+    {
+        monster->attacked(m_model);
+        //this->scheduleOnce(schedule_selector(RoleObject::setUnProtected), 1.0f);
+        CCActionInterval * blink = CCBlink ::create(1, 20);
+        CCCallFunc *unProtectedAction = CCCallFunc::create(this, callfunc_selector(RoleObject::setUnProtected));
+        CCFiniteTimeAction *seq = CCSequence::create(blink, unProtectedAction, NULL);
+        this->runAction(seq);
+    }
+}
+
 //if weapon attacking area is collied with other body, this function will be called.
 void RoleObject::onAttacking(b2Contact *contact, b2Body* otherBody)
 {
@@ -484,7 +495,15 @@ void RoleObject::onAttacking(b2Contact *contact, b2Body* otherBody)
     
     m_weapon->interationWithOther(contact, otherBody, m_onTouchDown);
 }
-
+bool RoleObject::isProtected()
+{
+    return m_isProtected;
+}
+void RoleObject::setUnProtected()
+{
+    this->setVisible(true);
+    m_isProtected = false;
+}
 bool RoleObject::onTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
 {
     m_onTouchDown = true;

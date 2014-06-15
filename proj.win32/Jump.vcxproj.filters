@@ -161,5 +161,12 @@
     <ClInclude Include="..\Classes\Model\BiliBoard.h">
       <Filter>Classes\Model</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="..\Classes\Utils\RapidXml.h">
+      <Filter>Classes\Utils</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Jump.rc" />
   </ItemGroup>
 </Project>
