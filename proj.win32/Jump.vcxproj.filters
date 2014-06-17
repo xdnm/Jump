@@ -87,6 +87,9 @@
     <ClCompile Include="..\Classes\Model\BiliBoard.cpp">
       <Filter>Classes\Model</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Utils\GameConfig.cpp">
+      <Filter>Classes\Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -163,6 +166,9 @@
     </ClInclude>
     <ClInclude Include="resource.h" />
     <ClInclude Include="..\Classes\Utils\RapidXml.h">
+      <Filter>Classes\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Utils\GameConfig.h">
       <Filter>Classes\Utils</Filter>
     </ClInclude>
   </ItemGroup>
