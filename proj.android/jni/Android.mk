@@ -6,10 +6,11 @@ LOCAL_MODULE := cocos2dcpp_shared
 
 LOCAL_MODULE_FILENAME := libcocos2dcpp
 
-FILE_LIST += $(wildcard $(LOCAL_PATH)/../../Classes/Model/*.cpp)
-FILE_LIST += $(wildcard $(LOCAL_PATH)/../../Classes/Object/*.cpp)
-FILE_LIST += $(wildcard $(LOCAL_PATH)/../../Classes/Utils/*.cpp)
-FILE_LIST += $(wildcard $(LOCAL_PATH)/../../Classes/Weapon/*.cpp)
+FILE_LIST += $(wildcard $(LOCAL_PATH)/Classes/Model/*.cpp)
+FILE_LIST += $(wildcard $(LOCAL_PATH)/Classes/Object/*.cpp)
+FILE_LIST += $(wildcard $(LOCAL_PATH)/Classes/Utils/*.cpp)
+FILE_LIST += $(wildcard $(LOCAL_PATH)/Classes/Weapon/*.cpp)
+FILE_LIST += $(wildcard $(LOCAL_PATH)/Classes/Xml/*.cpp)
 
 LOCAL_SRC_FILES := hellocpp/main.cpp \
                    Classes/AppDelegate.cpp \
@@ -18,7 +19,7 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
 LOCAL_SRC_FILES += $(FILE_LIST:$(LOCAL_PATH)/%=%)
 
 
-FILE_INCLUDES := $(shell find $(LOCAL_PATH)/../../Classes -type d)                    
+FILE_INCLUDES := $(shell find $(LOCAL_PATH)/Classes -type d)                    
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/Classes
 LOCAL_C_INCLUDES += FILE_INCLUDES
@@ -26,6 +27,7 @@ LOCAL_C_INCLUDES += FILE_INCLUDES
 #LOCAL_C_INCLUDES += $(LOCAL_PATH)/Classes/Model
 #LOCAL_C_INCLUDES += $(LOCAL_PATH)/Classes/Object
 #LOCAL_C_INCLUDES += $(LOCAL_PATH)/Classes/Weapon
+
 
 LOCAL_WHOLE_STATIC_LIBRARIES += cocos2dx_static
 LOCAL_WHOLE_STATIC_LIBRARIES += cocosdenshion_static

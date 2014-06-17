@@ -3,6 +3,7 @@
 
 #include "cocos2d.h"
 #include "Box2D/Box2D.h"
+#include "Utils/RapidXml.h"
 USING_NS_CC;
 
 class B2CCNode : public CCNode

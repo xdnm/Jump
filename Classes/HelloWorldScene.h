@@ -33,6 +33,25 @@ public:
 	virtual bool ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent);
     virtual void ccTouchEnded(CCTouch *pTouch, CCEvent *pEvent);
     virtual void ccTouchMoved(CCTouch *pTouch, CCEvent *pEvent);
+
+    void copyData(const char* pFileName);
+    bool isFileExist(const char* pFileName)
+    {
+        if( !pFileName ) return false;
+
+        //strFilePathName is :/data/data/ + package name
+        std::string filePath = CCFileUtils::sharedFileUtils()->getWritablePath();
+        filePath += pFileName;
+
+        FILE *fp = fopen(filePath.c_str(),"r");
+        if(fp)
+        {
+            fclose(fp);
+            return true;
+        }
+        return false;
+    }
+
 private:
 	void worldTick(float dt);
 

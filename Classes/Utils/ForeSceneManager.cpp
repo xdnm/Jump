@@ -12,23 +12,30 @@ ForeSceneManager::ForeSceneManager()
     m_edgeArray->retain();
 
     m_screenSize = CCDirector::sharedDirector()->getVisibleSize();
-
-    rapidxml::file<> fdoc(CCFileUtils::sharedFileUtils()->fullPathForFilename("Xmls/Scene.xml").c_str());
-    rapidxml::xml_document<> SceneDoc;
-    SceneDoc.parse<0>(fdoc.data());
-
-    xml_node<> *node = SceneDoc.first_node();
-    xml_node<> *node1 = node->first_node();
-    xml_attribute<char> *attr = node1->first_attribute("name");
-    attr->value();
     
-    initBlockArray();
-    initEdgeArray();
 }
 
 void ForeSceneManager::createNewScene(char *SceneName)
 {
+    m_presentScene = GameConfig::Instance()->getFirstSceneNode("BoardLand");
+
+    if(m_presentScene == NULL)
+    {
+        CCLOG("ReadScene config failed!!!Please Check the Scene.xml file");
+        return;
+    }
+    else
+        CCLOG("Begin to build the Scene: %s.", m_presentScene->first_attribute("Name"));
+
+    m_blockArray->removeAllObjects();
+    m_edgeArray->removeAllObjects();
     
+    m_screenContent->clear();
+
+    initBlockArray();
+    initEdgeArray();
+
+    this->schedule(schedule_selector(ForeSceneManager::generateBlocks1), 0.1f);
 }
 void ForeSceneManager::deleteAll()
 {
@@ -41,11 +48,12 @@ void ForeSceneManager::initBlockArray()
 {
     for(int i = 0; i < 20; i++)
     {
-        RigidBlock *tempBlock = RigidBlock::createRigidBlock(ccp(0, 0),CCSizeMake(120, 40), NULL);
-        tempBlock->setAlive(false);
+        //RigidBlock *tempBlock = RigidBlock::createRigidBlock(ccp(0, 0),CCSizeMake(120, 40), NULL);
+        Block* block = getRandomBlockFromScene();
+        block->setAlive(false);
         //tempBlock->autorelease();
         //tempBlock->retain();
-        m_blockArray->addObject(tempBlock);
+        m_blockArray->addObject(block);
     }
 
     for(int i = 0; i < 20; i++)
@@ -60,6 +68,13 @@ void ForeSceneManager::initEdgeArray()
 
 }
 
+void ForeSceneManager::generateBlocks1(float dt)
+{
+    int height = -m_layer->getPositionY();
+    blocksManage(height);
+    edgeManage(height);
+    monstorManage(height);
+}
 void ForeSceneManager::generateBlocks(int layyerPositionY)
 {
     blocksManage(-layyerPositionY);
@@ -71,16 +86,12 @@ void ForeSceneManager::generateBlocks(int layyerPositionY)
 
 void ForeSceneManager::blocksManage(int height)
 {
-    //B2CCNode *tempObject = (B2CCNode *)(m_blockArray->randomObject());
-    //m_layer->addChild(tempObject);
-    //tempObject->release();
-    //tempObject->release();
-
-    //add new block in the top
     int screenTop = height + m_screenSize.height;
 
-    Block* lastBlock = NULL;
+   // xml_node<> *node = m_file.first_node();
 
+    Block* lastBlock = NULL;
+    xml_node<> *node = m_doc.first_node();
     for(int i = m_screenContent->size() - 1; i >= 0; i--)
     {
         int tag = m_screenContent->at(i)->getTag();
@@ -194,7 +205,34 @@ void ForeSceneManager::edgeManage(int height)
 
 void ForeSceneManager::monstorManage(int height)
 {
+    int lastHeight = 0;
 
+    //Delete the monsters which is below the screen;
+    vector<B2CCNode*>::iterator iter;
+    for(iter = m_screenContent->begin(); iter != m_screenContent->end(); )
+    {
+        if(TagHelper::Instance()->isObject((*iter)->getTag(), ON_MONSTOR))
+        {
+            lastHeight = (*iter)->getB2NodePostion().y;
+
+            if((*iter)->getB2NodePostion().y < height)
+            {
+                (*iter)->setAlive(false);
+                m_layer->removeChild((CCNode*)(*iter));
+                iter = m_screenContent->erase(iter);
+            }
+            else
+                iter++;
+
+        }
+        else
+            iter++;
+    }
+
+    if(height + m_screenSize.height > lastHeight)
+    {
+
+    }
 }
 
 B2CCNode *ForeSceneManager::nameProject(char *name)
@@ -214,4 +252,34 @@ B2CCNode *ForeSceneManager::nameProject(char *name)
     } while (0);
 
     return pRet;
+}
+
+Block* ForeSceneManager::getRandomBlockFromScene()
+{
+    int ranNum = rand()%100 + 1;
+    Block *block = NULL;
+    xml_node<> *blocksNode = m_presentScene->first_node("Blocks");
+
+    for(xml_attribute<> *eachBlock = blocksNode->first_attribute(); eachBlock != NULL; eachBlock = eachBlock->next_attribute())
+    {
+        if(atoi(eachBlock->value()) > ranNum)
+        {
+            xml_node<> * blockNode = GameConfig::Instance()->getFirstBlockNode(eachBlock->name());
+            if(blockNode == NULL)
+            {
+                block = NULL;
+                break;
+            }
+
+            if(strcmp(blockNode->first_attribute("Class")->value(), "RigidBlock") == 0)
+            {
+                block = RigidBlock::createRigidBlock(ccp(0, 0), CCSizeMake(50, 100), blockNode);
+               
+            }
+
+             break;
+        }
+    }
+
+    return block;
 }

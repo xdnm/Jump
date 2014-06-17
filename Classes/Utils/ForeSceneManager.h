@@ -3,10 +3,10 @@
 #include "Utils/TagHelper.h"
 #include "Object/RigidBlock.h"
 #include "Object/RigidEdge.h"
-#include "Utils/RapidXml.h"
+#include "GameConfig.h"
 USING_NS_CC;
 
-class ForeSceneManager : CCObject
+class ForeSceneManager : CCNode
 {
 public:
     static ForeSceneManager* Instance()
@@ -19,8 +19,10 @@ public:
     void setWatchLayer(CCLayer *layer)
     {
         this->m_layer = layer;
+        layer->addChild(this);
     }
 
+    void generateBlocks1(float dt);
 
     void generateBlocks(int layyerPositionY);
 
@@ -28,6 +30,10 @@ public:
     void createNewScene(char *SceneName);
     /**Delete all the contents in the pools, when we change the forescene we can use this function*/
     void deleteAll();
+
+    Block* getRandomBlockFromScene();
+    Monster *getMonster(char *monsterName);
+
 
 private:
     ForeSceneManager();
@@ -50,6 +56,9 @@ private:
     CCArray *m_edgeArray;
     CCSize m_screenSize;
 
+    rapidxml::file<> *m_file;
+    rapidxml::xml_document<> m_doc;
+    rapidxml::xml_node<> *m_presentScene;
 
     vector<B2CCNode*> *m_screenContent;
     int m_unitHeight;

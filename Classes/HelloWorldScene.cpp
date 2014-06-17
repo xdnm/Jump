@@ -23,6 +23,10 @@ CCScene* HelloWorld::scene()
 // on "init" you need to initialize your instance
 bool HelloWorld::init()
 {
+    CCLog("copy file..");
+    copyData("Scene.xml");
+    copyData("Block.xml");
+    copyData("Monster.xml");
     //////////////////////////////
     // 1. super init first
     if ( !CCLayer::init() )
@@ -147,7 +151,7 @@ bool HelloWorld::init()
     //RigidEdge *edge = RigidEdge::createRigidEdge(ccp(100, 0), 100, NULL);
     //this->addChild((CCNode*)edge);
 
-    //this->runAction(JumpFollow::create(m_role->m_node));
+    this->runAction(JumpFollow::create(m_role->m_visiableNode));
 
   
     //RigidBlock *block = RigidBlock::createRigidBlock(ccp(150, 250), CCSizeMake(50, 20), NULL);
@@ -165,6 +169,7 @@ bool HelloWorld::init()
 
 	//--------------Register region--------------------------
     ForeSceneManager::Instance()->setWatchLayer(this);
+    ForeSceneManager::Instance()->createNewScene("PromiseLand");
     B2Handler::createB2Handler(m_world);
 	this->schedule(schedule_selector(HelloWorld::worldTick));
 	CCDirector::sharedDirector()->getTouchDispatcher()->addTargetedDelegate(this, 0, true);
@@ -200,7 +205,7 @@ void HelloWorld::worldTick(float dt)
     B2Helper::Instance()->bodiesListener(dt);
 	m_world->Step(dt, 8, 8);
 	
-    ForeSceneManager::Instance()->generateBlocks(this->getPositionY());
+    //ForeSceneManager::Instance()->generateBlocks(this->getPositionY());
 }
 
 bool HelloWorld::ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
@@ -223,4 +228,31 @@ void HelloWorld::ccTouchMoved(CCTouch *pTouch, CCEvent *pEvent)
     CCPoint touchPoint = this->convertTouchToNodeSpace(pTouch);
     CCLog("Touch Moved. Screen point : ( %f, %f)", touchPoint.x, touchPoint.y);
     m_role->onTouchMoved(pTouch, pEvent);
+}
+
+void HelloWorld::copyData(const char* pFileName)
+{
+    std::string strPath = CCFileUtils::sharedFileUtils()->fullPathForFilename(pFileName);
+    unsigned long len = 0;
+    unsigned char *data = NULL;
+
+    if(isFileExist(pFileName) == false)
+    {
+        CCLog("File %s does not exsit.", pFileName);
+    }
+
+    data = CCFileUtils::sharedFileUtils()->getFileData(strPath.c_str(),"r",&len);
+    if(len == 0)
+    {
+        CCLog("File %s does not exsit!", pFileName);
+    }
+    
+    std::string destPath = CCFileUtils::sharedFileUtils()->getWritablePath();
+    destPath += pFileName;
+    CCLog("copy file to %s", destPath.c_str());
+    FILE *fp = fopen(destPath.c_str(),"w+");
+    fwrite(data,sizeof(char),len,fp);
+    fclose(fp);
+    delete []data;
+    data = NULL;
 }

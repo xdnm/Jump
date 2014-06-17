@@ -31,9 +31,15 @@ RigidBlock* RigidBlock::createRigidBlock(CCPoint point, CCSize size, void *parm)
 
 bool RigidBlock::initWithPointSize(CCPoint point, CCSize size, void *parm)
 {
-    
-	m_position = point;
-	m_size	= size;
+    //Add code for config support.
+    //now we get the size and other parm from (void* parm) the xml_node<> *node
+    xml_node<>* node = (xml_node<> *)parm;
+    m_size = CCSizeMake( atoi(node->first_attribute("Width")->value()), atoi(node->first_attribute("Height")->value()));
+    m_position = point;
+
+    m_texture = cocos2d::CCTextureCache::sharedTextureCache()->addImage(node->first_attribute("Texture")->value());
+	/*m_position = point;
+	m_size	= size;*/
 	//this->setTag(TagHelper::Instance()->getBlockTag());
 
 	createBody();
@@ -113,7 +119,7 @@ bool RigidBlock::createBody()
 
 bool RigidBlock::initRenderData()
 {
-	m_texture = cocos2d::CCTextureCache::sharedTextureCache()->addImage("rigidblock.png");
+
 	
 	m_textCoord[0] = Vertex2DMake(0.0f, 0.0f);
 	m_textCoord[1] = Vertex2DMake(1.0f, 0.0f);

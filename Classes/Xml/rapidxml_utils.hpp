@@ -12,6 +12,8 @@
 #include <string>
 #include <fstream>
 #include <stdexcept>
+#include "cocos2d.h"
+USING_NS_CC;
 
 namespace rapidxml
 {
@@ -31,13 +33,20 @@ namespace rapidxml
 
             // Open stream
             basic_ifstream<Ch> stream(filename, ios::binary);
+           
+
             if (!stream)
+            {
+                CCLog("Can't open file %s", filename);
                 throw runtime_error(string("cannot open file ") + filename);
+            }
+
             stream.unsetf(ios::skipws);
             
             // Determine stream size
             stream.seekg(0, ios::end);
             size_t size = stream.tellg();
+            CCLog("File size %d", size);
             stream.seekg(0);   
             
             // Load data and add terminating 0
