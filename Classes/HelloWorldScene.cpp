@@ -75,7 +75,7 @@ bool HelloWorld::init()
 
 
 	//--------------init world-------------------------
-	b2Vec2 gravity = b2Vec2(0.0f, -20.0f);
+	b2Vec2 gravity = b2Vec2(0.0f, -40.0f);
 	bool doSleep = true;
 	//world = new b2World()
 	m_world = new b2World(gravity);
@@ -115,18 +115,7 @@ bool HelloWorld::init()
 
 	//test block---------------------------------------------------
 	b2PolygonShape polyShape;
-	/*polyShape.SetAsBox(100.0f/PTM_RATIO, 20.0f/PTM_RATIO);
-
-	b2FixtureDef fixtureDef;
-	fixtureDef.shape = &polyShape;
-	fixtureDef.density = 1.0f;
-
-	b2BodyDef	bodyDef;
-	bodyDef.type = b2_dynamicBody;
-	bodyDef.position = b2Vec2(200/PTM_RATIO, 200/PTM_RATIO);
-
-	b2Body *body = m_world->CreateBody(&bodyDef);
-	body	->CreateFixture(&fixtureDef);*/
+	
 	//end test block---------------------------------------------
 
 	//--------------set role----------------------------
@@ -147,17 +136,6 @@ bool HelloWorld::init()
         height += 100;
     }
 
-
-    //RigidEdge *edge = RigidEdge::createRigidEdge(ccp(100, 0), 100, NULL);
-    //this->addChild((CCNode*)edge);
-
-    this->runAction(JumpFollow::create(m_role->m_visiableNode));
-
-  
-    //RigidBlock *block = RigidBlock::createRigidBlock(ccp(150, 250), CCSizeMake(50, 20), NULL);
-    //block->setAlive(true);
-    //this->addChild((CCNode *)block);
-
     MonsterMushroom *mush = MonsterMushroom::createMushroom(this, ccp(200, 200), CCSizeMake(100, 100), NULL);
     this->addChild((CCNode*)mush);
     
@@ -173,6 +151,8 @@ bool HelloWorld::init()
     B2Handler::createB2Handler(m_world);
 	this->schedule(schedule_selector(HelloWorld::worldTick));
 	CCDirector::sharedDirector()->getTouchDispatcher()->addTargetedDelegate(this, 0, true);
+    this->setAccelerometerEnabled(true);
+    this->runAction(JumpFollow::create(m_role->m_visiableNode));
 	//--------------end register region---------------------
     return true;
 }
@@ -229,18 +209,26 @@ void HelloWorld::ccTouchMoved(CCTouch *pTouch, CCEvent *pEvent)
     CCLog("Touch Moved. Screen point : ( %f, %f)", touchPoint.x, touchPoint.y);
     m_role->onTouchMoved(pTouch, pEvent);
 }
+void HelloWorld::didAccelerate(CCAcceleration* pAccelerationValue)
+{
+    b2Vec2 gravity (pAccelerationValue->x * 50, pAccelerationValue->y * 60);
+    //m_world->SetGravity(gravity);
+    m_role->setLinearVecByAcceleration(pAccelerationValue);
+    //CCLog("Current acceleration is : (%f, %f).", pAccelerationValue->x, pAccelerationValue->y );
+}
+
 
 void HelloWorld::copyData(const char* pFileName)
 {
     std::string strPath = CCFileUtils::sharedFileUtils()->fullPathForFilename(pFileName);
     unsigned long len = 0;
     unsigned char *data = NULL;
-
+    
     if(isFileExist(pFileName) == false)
     {
         CCLog("File %s does not exsit.", pFileName);
     }
-
+    
     data = CCFileUtils::sharedFileUtils()->getFileData(strPath.c_str(),"r",&len);
     if(len == 0)
     {

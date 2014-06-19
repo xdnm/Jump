@@ -100,6 +100,7 @@ bool MonsterMushroom::createBody()
      bodyDef.position = b2Vec2(m_position.x/PTM_RATIO, m_position.y/PTM_RATIO + polyHeight * 1.5f);
      bodyDef.type = b2_dynamicBody;
      bodyDef.fixedRotation = false;
+
      m_topBody = B2Helper::Instance()->getWorld()->CreateBody(&bodyDef);
      m_topBody->CreateFixture(&fixtureDef);
      m_topBody->SetUserData(this);
@@ -109,7 +110,7 @@ bool MonsterMushroom::createBody()
      jointOffset = b2Vec2(m_size.width/PTM_RATIO/2, 0);
      b2DistanceJointDef jointDef;
      jointDef.collideConnected = true;
-     jointDef.dampingRatio = 0.1f;
+     jointDef.dampingRatio = 0.5f;
      jointDef.frequencyHz = 5.0f;
      jointDef.Initialize(m_topBody, m_bottomBody, m_topBody->GetWorldCenter() - jointOffset, m_bottomBody->GetWorldCenter() - jointOffset);
      B2Helper::Instance()->getWorld()->CreateJoint(&jointDef);
@@ -149,34 +150,35 @@ void MonsterMushroom::draw()
 
 bool MonsterMushroom::isReady()
 {
-    if(m_topBody->GetLinearVelocity().Length() > 1.0f)
-        return false;
-    else
-        return true; 
+    return m_isReady;
 }
 
 bool MonsterMushroom::attacked(ObjectModel *model)
 {
-    CCLOG("tag %d attacked role!", this->getTag());
-    //model->m_B2Node->m_mainBody->ApplyForce(b2Vec2(100.0f, 0), model->m_B2Node->m_mainBody));
+    if(isReady())
+    {
+        CCLOG("tag %d attacked role!", this->getTag());
+        //model->m_B2Node->m_mainBody->ApplyForce(b2Vec2(100.0f, 0), model->m_B2Node->m_mainBody));
 
-    B2CCNode *node = model->m_B2Node;
-    float force = 4.0f;
-    if(node->getB2NodePostion().x > m_position.x)
-        node->m_mainBody->ApplyLinearImpulse(b2Vec2(force, force/2), node->m_mainBody->GetWorldCenter());
-    else
-        node->m_mainBody->ApplyLinearImpulse(b2Vec2(-force, force/2), node->m_mainBody->GetWorldCenter());
+        B2CCNode *node = model->m_B2Node;
+        float force = 4.0f;
+        //this->scheduleOnce(schedule_selector(MonsterMushroom::setNotReady), 0.2f);
+    }
 
-    model->beenAttackWithModel(m_model);
     return true;
 }
 
 bool MonsterMushroom::beenTrampled(ObjectModel *model)
 {
-    CCLOG("tag : %d been trampled", this->getTag());
-    this->m_model->beenAttackWithModel(model);
-    this->checkHealth();
 
+    if(isReady())
+    {
+            CCLOG("tag : %d been trampled", this->getTag());
+        //this->m_model->beenAttackWithModel(model);
+        this->checkHealth();
+       
+        this->scheduleOnce(schedule_selector(MonsterMushroom::setNotReady), 0.2f);
+    }
     return true;
 }
 

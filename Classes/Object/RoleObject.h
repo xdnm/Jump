@@ -36,6 +36,9 @@ public:
     bool onTouchBegan(CCTouch *pTouch, CCEvent *pEvent);
     bool onTouchEnded(CCTouch *pTouch, CCEvent *pEvent);
     bool onTouchMoved(CCTouch *pTouch, CCEvent *pEvent);
+
+    void setLinearVecByAcceleration(CCAcceleration* pAccelerationValue);
+
 private:
 	RoleObject();
     void update(float delta);
@@ -56,6 +59,8 @@ private:
     void beenAttacked(Monster *monster);
     bool isProtected();
     void setUnProtected();
+
+
 public:
     //ccnode for layer to follow or other things
     CCNode *m_node;

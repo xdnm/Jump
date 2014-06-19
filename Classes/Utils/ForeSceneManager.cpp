@@ -193,7 +193,7 @@ void ForeSceneManager::edgeManage(int height)
     
     for(iter = m_screenContent->begin(); iter != m_screenContent->end(); )
     {
-        if(TagHelper::Instance()->isObject((*iter)->getTag(), ON_EDGE) && (*iter)->getB2NodePostion().y < height - Edge::s_height / 2)
+        if(TagHelper::Instance()->isObject((*iter)->getTag(), ON_EDGE) && (*iter)->getB2NodePostion().y < height - m_screenSize.height / 2)
         {
             (*iter)->autorelease();
             iter = m_screenContent->erase(iter);
@@ -260,10 +260,12 @@ Block* ForeSceneManager::getRandomBlockFromScene()
     Block *block = NULL;
     xml_node<> *blocksNode = m_presentScene->first_node("Blocks");
 
+    //we had a random num(range from 1 to 100, then we iterate this scene's blocks node, find the first block which its value bigger than the random num)
     for(xml_attribute<> *eachBlock = blocksNode->first_attribute(); eachBlock != NULL; eachBlock = eachBlock->next_attribute())
     {
         if(atoi(eachBlock->value()) > ranNum)
         {
+            //this is the blocknode we get from the scene.
             xml_node<> * blockNode = GameConfig::Instance()->getFirstBlockNode(eachBlock->name());
             if(blockNode == NULL)
             {
@@ -271,10 +273,11 @@ Block* ForeSceneManager::getRandomBlockFromScene()
                 break;
             }
 
+            //in current design, each block may have different Class use different class to init.
             if(strcmp(blockNode->first_attribute("Class")->value(), "RigidBlock") == 0)
             {
-                block = RigidBlock::createRigidBlock(ccp(0, 0), CCSizeMake(50, 100), blockNode);
-               
+                //block = RigidBlock::createRigidBlock(ccp(0, 0), CCSizeMake(50, 100), blockNode);
+               block = RigidBlock::createWithConfigNode(blockNode);
             }
 
              break;

@@ -4,6 +4,8 @@ Monster::Monster()
 {
     B2CCNode::init();
     m_model = new ObjectModel();
+
+    m_isReady = true;
 }
 
 Monster::~Monster()
@@ -42,4 +44,8 @@ bool Monster::checkHealth()
     return false;
 }
 
+void Monster::setNotReady(float dt)
+{
+    this->m_isReady = false;
+}
 

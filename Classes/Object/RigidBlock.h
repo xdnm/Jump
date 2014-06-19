@@ -14,6 +14,9 @@ public:
 	~RigidBlock();
 
 	static RigidBlock* createRigidBlock(CCPoint point, CCSize size, void *parm);
+    /**Use the Xml config node to create a RigidBlock, most inner logic is same
+    with the normal create function*/
+    static RigidBlock* createWithConfigNode(xml_node<> *node);
 	void setAlive(bool flag);
 	bool setBlockPosition(cocos2d::CCPoint position);
 	void interationWithOther(b2Body* otherBody);
@@ -26,6 +29,7 @@ public:
 	void onCollied(b2Contact *contact, b2Body *bodyOther);
 private:
 	bool initWithPointSize(CCPoint point, CCSize size, void *parm);
+    bool initWithConfigNode(xml_node<> *node);
 	bool createBody();
 	bool initRenderData();
 

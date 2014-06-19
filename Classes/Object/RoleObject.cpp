@@ -59,7 +59,7 @@ bool RoleObject::initWithWorld(b2World* world, void *parm)
 
 		//world init
 		m_world = world;
-		m_position = ccp(100, 70);
+		m_position = ccp(200, 400);
 
         m_bounce = false;
 
@@ -328,79 +328,147 @@ void RoleObject::draw()
 
 }
 
+//old collision function
+//void RoleObject::onCollied(b2Contact *contact, b2Body *bodyOther)
+//{
+//    if(!contact->IsEnabled())
+//        return ;
+//
+//	CCNode *otherNode = (CCNode*)(bodyOther->GetUserData());
+//    b2Body *selfBody;
+//    if(contact->GetFixtureA()->GetBody() == bodyOther)
+//        selfBody = contact->GetFixtureA()->GetBody();
+//    else
+//        selfBody = contact->GetFixtureB()->GetBody();
+//	//CCLog("tag %d collied with tag %d", this->getTag(), otherNode == NULL? 0:otherNode->getTag());
+//
+//    //if the othernode is a unset object or the edge object, do nothing to this collision
+//    if(otherNode == NULL)
+//        return ;
+//    else if(otherNode->getTag() == 3)
+//        return;
+//    
+//    //if the role is moving up, ingore this collision
+//    if(m_innerBody->GetLinearVelocity().y > 0 || m_weapon->isHooked())
+//    {
+//        if(TagHelper::Instance()->isObject(otherNode->getTag(), ON_MONSTOR) )
+//        {
+//            if(m_bottomBody->GetPosition().y < bodyOther->GetPosition().y)
+//            {
+//                Monster *monster = dynamic_cast<Monster*>(otherNode);
+//                beenAttacked(monster);
+//                
+//
+//                contact->SetEnabled(false);
+//            }
+//            else
+//            {
+//                contact->SetEnabled(true);
+//            }
+//        }
+//        else
+//        {
+//            contact->SetEnabled(false);
+//        }
+//    }
+//    else if(bodyOther->GetPosition().y > m_bottomBody->GetPosition().y)
+//    {
+//        //if role is moving down, but the colliision object is above at the bottom body, ingore this collision.
+//        if(TagHelper::Instance()->isObject(otherNode->getTag(), ON_MONSTOR) 
+//            && m_bottomBody->GetPosition().y < bodyOther->GetPosition().y)
+//        {
+//            Monster *monster = dynamic_cast<Monster*>(otherNode);
+//
+//            monster->attacked(m_model);
+//        }
+//        contact->SetEnabled(false);
+//    }
+//    else
+//    {
+//        if(TagHelper::Instance()->isObject(otherNode->getTag(), ON_BLOCK))
+//            jump(20.0f);
+//
+//        if(TagHelper::Instance()->isObject(otherNode->getTag(), ON_MONSTOR))
+//        {
+//            
+//            Monster *monster = dynamic_cast<Monster*>(otherNode);
+//            if(monster->isReady())
+//            {
+//                jump(10.0f);
+//                monster->beenTrampled(m_model);
+//            }
+//        }
+//        contact->SetEnabled(true);
+//    }
+//}
+
+
+
 void RoleObject::onCollied(b2Contact *contact, b2Body *bodyOther)
 {
-    if(!contact->IsEnabled())
-        return ;
-
-	CCNode *otherNode = (CCNode*)(bodyOther->GetUserData());
-    b2Body *selfBody;
-    if(contact->GetFixtureA()->GetBody() == bodyOther)
-        selfBody = contact->GetFixtureA()->GetBody();
-    else
-        selfBody = contact->GetFixtureB()->GetBody();
-	//CCLog("tag %d collied with tag %d", this->getTag(), otherNode == NULL? 0:otherNode->getTag());
-
-    //if the othernode is a unset object or the edge object, do nothing to this collision
-    if(otherNode == NULL)
-        return ;
-    else if(otherNode->getTag() == 3)
-        return;
-    
-    //if the role is moving up, ingore this collision
-    if(m_innerBody->GetLinearVelocity().y > 0 || m_weapon->isHooked())
+    bool isEnable = true;
+    do 
     {
-        if(TagHelper::Instance()->isObject(otherNode->getTag(), ON_MONSTOR) )
-        {
-            if(m_bottomBody->GetPosition().y < bodyOther->GetPosition().y)
-            {
-                Monster *monster = dynamic_cast<Monster*>(otherNode);
-                beenAttacked(monster);
-                
+        B2CCNode *otherNode;
+        otherNode = static_cast<B2CCNode*>(bodyOther->GetUserData());
 
-                contact->SetEnabled(false);
+        b2Body *selfBody;
+        if(contact->GetFixtureA()->GetBody() == bodyOther)
+            selfBody = contact->GetFixtureB()->GetBody();
+        else
+            selfBody = contact->GetFixtureA()->GetBody();
+
+        //collistion with a block
+        //two choice: 
+        //1: role is moving up, enable = false.
+        //2. role is moving down and collisition happen by bottom body, enable = true;
+        if(TagHelper::Instance()->isObject(otherNode->getTag(), ON_BLOCK))
+        {
+            if(m_innerBody->GetLinearVelocity().y >= 0)
+            {
+                isEnable = false;
+                break;
+            }
+            else if(selfBody == m_bottomBody)
+            {
+                isEnable = true;
+                break;
+            }
+        }
+        else if(TagHelper::Instance()->isObject(otherNode->getTag(), ON_MONSTOR))
+        {
+            Monster *monster = dynamic_cast<Monster*>(otherNode);
+            CC_BREAK_IF(monster == NULL);
+
+            if(selfBody == m_bottomBody)
+            {
+                float dis = abs(m_bottomBody->GetPosition().y - bodyOther->GetPosition().y);
+                if(dis < 0.5)
+                {
+                    monster->beenTrampled(m_model);
+                    jump();
+                    isEnable = true;
+                    break;
+                }
             }
             else
             {
-                contact->SetEnabled(true);
+                this->beenAttacked(monster);
+                
+                isEnable = false;
+                break;
             }
-        }
-        else
-        {
-            contact->SetEnabled(false);
-        }
-    }
-    else if(bodyOther->GetPosition().y > m_bottomBody->GetPosition().y)
-    {
-        //if role is moving down, but the colliision object is above at the bottom body, ingore this collision.
-        if(TagHelper::Instance()->isObject(otherNode->getTag(), ON_MONSTOR) 
-            && m_bottomBody->GetPosition().y < bodyOther->GetPosition().y)
-        {
-            Monster *monster = dynamic_cast<Monster*>(otherNode);
 
-            monster->attacked(m_model);
+            isEnable = false;
+            break;
         }
-        contact->SetEnabled(false);
-    }
-    else
-    {
-        if(TagHelper::Instance()->isObject(otherNode->getTag(), ON_BLOCK))
-            jump(20.0f);
 
-        if(TagHelper::Instance()->isObject(otherNode->getTag(), ON_MONSTOR))
-        {
-            
-            Monster *monster = dynamic_cast<Monster*>(otherNode);
-            if(monster->isReady())
-            {
-                jump(10.0f);
-                monster->beenTrampled(m_model);
-            }
-        }
-        contact->SetEnabled(true);
-    }
+    } while (0);
+
+    contact->SetEnabled(isEnable);
+
+
 }
-
 void RoleObject::update(float delta)
 {
     m_visiableNode->setPosition(ccp(m_innerBody->GetPosition().x * PTM_RATIO, m_innerBody->GetPosition().y * PTM_RATIO));
@@ -433,6 +501,7 @@ void RoleObject::update(float delta)
             m_bounce = false;
         }
     }
+    
 }
 
 bool RoleObject::attack()
@@ -461,6 +530,9 @@ void RoleObject::hookAction(b2Body *hookedBody, b2Vec2 point)
 
 void RoleObject::setFaceLeft(bool isFaceLeft)
 {
+    if(m_weapon->isHooked())
+        return;
+
     if(m_faceLeft == !isFaceLeft)
     {
         b2Body *tempBody;
@@ -529,4 +601,26 @@ bool RoleObject::onTouchEnded(CCTouch *pTouch, CCEvent *pEvent)
 bool RoleObject::onTouchMoved(CCTouch *pTouch, CCEvent *pEvent)
 {
     return true;
+}
+
+void RoleObject::setLinearVecByAcceleration(CCAcceleration* pAccelerationValue)
+{
+    float x = pAccelerationValue->x;
+    //TODO the maxVecx parm can be affected by this model's agility.
+    float maxVecX = 30.0f;
+
+    if(x > -0.1f && x < 0.1f)
+        x = 0.0f;
+
+    if(x > 0)
+    {
+        this->setFaceLeft(false);
+    }
+    else if (x < 0)
+    {
+        this->setFaceLeft(true);
+    }
+
+    m_innerBody->SetLinearVelocity(b2Vec2(x * maxVecX, m_innerBody->GetLinearVelocity().y));
+
 }

@@ -24,12 +24,19 @@ public:
     virtual bool beenAttacked(ObjectModel *model){return true;};
 
     virtual void onCollied(b2Contact* contact, b2Body *bodyOther);
-    virtual bool isReady()=0;
     
     bool checkHealth();
+
+    /**Whether this monster is ready is attack role and ready to beenTrample may be affect by many conditions
+        overload this function is subclass */
+    virtual bool isReady(){return m_isReady;};
+    void setNotReady(float dt);
 public:
     ObjectModel *m_model;
     CCLayer *m_layer;
+
+protected:
+    bool m_isReady;
 };
 
 #endif

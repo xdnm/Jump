@@ -50,6 +50,36 @@ bool RigidBlock::initWithPointSize(CCPoint point, CCSize size, void *parm)
 	return true;
 }
 
+
+RigidBlock* RigidBlock::createWithConfigNode(xml_node<> *node)
+{
+    RigidBlock *pRet = new RigidBlock();
+    if(pRet && pRet->initWithConfigNode(node))
+    {
+        pRet->autorelease();
+        return pRet;
+    }
+    else
+    {
+        delete pRet;
+        pRet = NULL;
+        return NULL;
+    }
+}
+bool RigidBlock::initWithConfigNode(xml_node<> *node)
+{
+    m_size = CCSizeMake( atoi(node->first_attribute("Width")->value()), atoi(node->first_attribute("Height")->value()));
+    m_texture = cocos2d::CCTextureCache::sharedTextureCache()->addImage(node->first_attribute("Texture")->value());
+    m_position = ccp(0, 0);
+    
+    createBody();
+    initRenderData();
+
+    setAlive(false);
+
+    return true;
+}
+
 void RigidBlock::setAlive(bool flag)
 {
 	if(flag)
