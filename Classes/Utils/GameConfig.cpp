@@ -68,3 +68,10 @@ xml_node<>* GameConfig::getFirstBlockNode(char *name /* = 0 */)
 
     return node;
 }
+
+xml_node<> *GameConfig::getFirstMonsterNode(char *name /* = 0 */)
+{
+    xml_node<> *node = m_monsterDoc.first_node()->first_node(name);
+
+    return node;
+}

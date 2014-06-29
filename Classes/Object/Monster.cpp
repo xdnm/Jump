@@ -44,8 +44,8 @@ bool Monster::checkHealth()
     return false;
 }
 
-void Monster::setNotReady(float dt)
+void Monster::setReady()
 {
-    this->m_isReady = false;
+    this->m_isReady = true;
 }
 

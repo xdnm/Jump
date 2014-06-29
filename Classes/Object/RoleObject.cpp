@@ -78,7 +78,7 @@ bool RoleObject::initWithWorld(b2World* world, void *parm)
 		m_textureCoords[3] = Vertex2DMake(1.0f, 0.5f);
 		m_textureCoords[4] = Vertex2DMake(0.0f, 1.0f);
 		m_textureCoords[5] = Vertex2DMake(1.0f, 1.0f);
-		m_texture = cocos2d::CCTextureCache::sharedTextureCache()->addImage("role.png");
+		m_texture = cocos2d::CCTextureCache::sharedTextureCache()->addImage("role3.png");
         
 		//create the pysical body 
 		createBody(parm);
@@ -418,45 +418,57 @@ void RoleObject::onCollied(b2Contact *contact, b2Body *bodyOther)
         else
             selfBody = contact->GetFixtureA()->GetBody();
 
+        if(m_weapon->isHooked())
+        {
+            isEnable = false;
+            break;
+        }
+
         //collistion with a block
         //two choice: 
         //1: role is moving up, enable = false.
         //2. role is moving down and collisition happen by bottom body, enable = true;
         if(TagHelper::Instance()->isObject(otherNode->getTag(), ON_BLOCK))
         {
-            if(m_innerBody->GetLinearVelocity().y >= 0)
-            {
-                isEnable = false;
-                break;
-            }
-            else if(selfBody == m_bottomBody)
-            {
-                isEnable = true;
-                break;
-            }
+           if(selfBody == m_bottomBody && selfBody->GetPosition().y > bodyOther->GetPosition().y && m_innerBody->GetLinearVelocity().y <= 0.0f)
+           {
+               jump();
+               isEnable = true;
+               break;
+           }
+           else
+           {
+               isEnable = false;
+               break;
+           }
         }
         else if(TagHelper::Instance()->isObject(otherNode->getTag(), ON_MONSTOR))
         {
             Monster *monster = dynamic_cast<Monster*>(otherNode);
             CC_BREAK_IF(monster == NULL);
 
-            if(selfBody == m_bottomBody)
+            float dis = abs(selfBody->GetPosition().y - bodyOther->GetPosition().y);
+
+            if(selfBody == m_bottomBody && dis < 0.5f)
             {
-                float dis = abs(m_bottomBody->GetPosition().y - bodyOther->GetPosition().y);
-                if(dis < 0.5)
+                if(monster->isReady())
                 {
                     monster->beenTrampled(m_model);
                     jump();
-                    isEnable = true;
-                    break;
                 }
             }
-            else
+            else 
             {
-                this->beenAttacked(monster);
-                
-                isEnable = false;
-                break;
+                if(m_faceLeft && m_innerBody->GetPosition().x < bodyOther->GetPosition().x)
+                {
+                    this->attack();
+                }
+                else if(!m_faceLeft && m_innerBody->GetPosition().x > bodyOther->GetPosition().x)
+                {
+                    this->attack();
+                }
+                else
+                    this->beenAttacked(monster);
             }
 
             isEnable = false;
@@ -497,7 +509,7 @@ void RoleObject::update(float delta)
     {
         if(abs(m_innerBody->GetLinearVelocity().y) < 5)
         {
-            m_innerBody->ApplyLinearImpulse(b2Vec2(0.0f, m_innerBody->GetMass() * 30), m_innerBody->GetWorldCenter());
+            m_innerBody->ApplyLinearImpulse(b2Vec2(0.0f, m_innerBody->GetMass() * 50), m_innerBody->GetWorldCenter());
             m_bounce = false;
         }
     }
@@ -514,6 +526,7 @@ bool RoleObject::attack()
 
 void RoleObject::hookAction(b2Body *hookedBody, b2Vec2 point)
 {
+    m_innerBody->SetLinearVelocity(b2Vec2(0, -10.0f));
     //plus the hook point
     CCPoint hookPoint = m_weapon->getWeaponPosition();
     
@@ -605,6 +618,9 @@ bool RoleObject::onTouchMoved(CCTouch *pTouch, CCEvent *pEvent)
 
 void RoleObject::setLinearVecByAcceleration(CCAcceleration* pAccelerationValue)
 {
+    if(m_weapon->isHooked())
+        return;
+
     float x = pAccelerationValue->x;
     //TODO the maxVecx parm can be affected by this model's agility.
     float maxVecX = 30.0f;

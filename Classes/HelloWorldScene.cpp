@@ -14,6 +14,7 @@ CCScene* HelloWorld::scene()
     // add layer as a child to scene
     scene->addChild(layer);
 
+    BackgroundLayer *background = BackgroundLayer::createBackground(scene, layer);
     
 	
     // return the scene
@@ -135,9 +136,13 @@ bool HelloWorld::init()
         this->addChild(tempSprite);
         height += 100;
     }
-
+    
     MonsterMushroom *mush = MonsterMushroom::createMushroom(this, ccp(200, 200), CCSizeMake(100, 100), NULL);
     this->addChild((CCNode*)mush);
+    
+    m_streak = MyCCMotionStreak::create(0.5f, 3.0f, 10, ccWHITE, "CloseNormal.png");
+    m_streak->setFollowNode(m_role, m_role->m_weapon, ccp(50, 200));
+    //this->addChild(m_streak);
     
     //body->ApplyForce(b2Vec2(10.0f, 0), body->GetWorldCenter());
     //body->ApplyForce(b2Vec2(0, body->GetMass() * gravity.Length()) , body->GetWorldCenter());
@@ -184,8 +189,11 @@ void HelloWorld::worldTick(float dt)
 {
     B2Helper::Instance()->bodiesListener(dt);
 	m_world->Step(dt, 8, 8);
-	
-    //ForeSceneManager::Instance()->generateBlocks(this->getPositionY());
+    
+    //m_streak->setPosition(m_role->m_weapon->convertToWorldSpace(m_role->m_weapon->getPosition()));
+    CCPoint point = this->convertToNodeSpace(m_role->m_weapon->convertToWorldSpace(ccp(0, 0)));
+    //m_streak->DestroySelf();
+    CCLog("(%f, %f)", point.x, point.y);
 }
 
 bool HelloWorld::ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
@@ -207,6 +215,7 @@ void HelloWorld::ccTouchMoved(CCTouch *pTouch, CCEvent *pEvent)
 {
     CCPoint touchPoint = this->convertTouchToNodeSpace(pTouch);
     CCLog("Touch Moved. Screen point : ( %f, %f)", touchPoint.x, touchPoint.y);
+    //m_streak->setPosition(touchPoint);
     m_role->onTouchMoved(pTouch, pEvent);
 }
 void HelloWorld::didAccelerate(CCAcceleration* pAccelerationValue)

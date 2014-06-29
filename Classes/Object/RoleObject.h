@@ -66,7 +66,8 @@ public:
     CCNode *m_node;
 
     ObjectModel *m_model;
-
+    //weapon data
+    Weapon *m_weapon;
 protected:
 private:
     float m_length;
@@ -92,8 +93,7 @@ private:
     CCSprite *m_leftHandSprite;
     CCSprite *m_rightHandSprite;
 
-    //weapon data
-    Weapon *m_weapon;
+
 
 
     float m_Unit;

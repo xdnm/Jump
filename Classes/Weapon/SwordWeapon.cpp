@@ -42,7 +42,7 @@ bool SwordWeapon::initWithParm(CCNode *hand, float unit /* = 1.0f */,b2Body *hoo
 {
     //we need to get the parm data to init the weapon
     m_hand = hand;
-
+    
     //testing code for init, I hard code the parm in below region
     m_unit = unit;
     m_size = CCSizeMake(30, 90);
@@ -59,6 +59,7 @@ bool SwordWeapon::initWithParm(CCNode *hand, float unit /* = 1.0f */,b2Body *hoo
     m_hookedBody = NULL;
     m_jointDef = NULL;
 
+    
     initActions();
 
     this->setScale(m_size.width/m_texture->getContentSize().width);
@@ -68,6 +69,7 @@ bool SwordWeapon::initWithParm(CCNode *hand, float unit /* = 1.0f */,b2Body *hoo
     //end testing code
 
     this->initWithTexture(m_texture);
+    this->setBatchNode(NULL);
    // this->initWithFile("sword3.png"); 
 
     this->setAnchorPoint(ccp(0.5f,0));
@@ -79,6 +81,9 @@ bool SwordWeapon::initWithParm(CCNode *hand, float unit /* = 1.0f */,b2Body *hoo
 
     this->scheduleUpdate();
     
+
+    m_streak = CCMotionStreak::create(0.5f, 3.0f, 32, ccRED, "CloseNormal.png");
+    this->addChild(m_streak);
     return true;
 }
 
@@ -295,22 +300,11 @@ void SwordWeapon::endDamege()
 
 void SwordWeapon::update(float delta)
 {
-    /*          CCLog("sword position : (%f, %f)", getPositionX(), getPositionY());
-    if(m_isHooked)
-    {
-    CCPoint anchorPoint = ccp(m_hookRoleBody->GetPosition().x * PTM_RATIO, m_hookRoleBody->GetPosition().y *PTM_RATIO);
-    CCPoint hookedPoint = ccp(m_hookedBody->GetPosition().x * PTM_RATIO, m_hookedBody->GetPosition().y * PTM_RATIO);
-
-
-    this->setPosition(anchorPoint);
-    float angle = ccpAngle(hookedPoint - anchorPoint, ccp(0, 1));
-
-    if(anchorPoint.x > hookedPoint.x)
-    angle = -angle;
-
-    this->setRotation(CC_RADIANS_TO_DEGREES(angle));
-
-    }*/
+    /* CCLog("Weapon position in node coords: (%f, %f)", this->getPositionX(), this->getPositionY());
+    CCPoint point = this->convertToWorldSpace(this->getPosition());
+    CCLog("Weapon position in world coords: (%f, %f)", point.x, point.y);*/
+    CCPoint point = this->convertToWorldSpace(this->getPosition());
+    CCLog("Weapon position in world coords: (%f, %f)", point.x, point.y);
 }
 
 void SwordWeapon::updateAttackArea(float delta)

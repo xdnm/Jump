@@ -3,6 +3,7 @@
 #include "Utils/TagHelper.h"
 #include "Object/RigidBlock.h"
 #include "Object/RigidEdge.h"
+#include "Object/MonsterMushroom.h"
 #include "GameConfig.h"
 USING_NS_CC;
 
@@ -32,7 +33,7 @@ public:
     void deleteAll();
 
     Block* getRandomBlockFromScene();
-    Monster *getMonster(char *monsterName);
+    Monster* getRandomMonsterFromScene(CCPoint point);
 
 
 private:

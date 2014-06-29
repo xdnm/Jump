@@ -35,7 +35,7 @@ void ForeSceneManager::createNewScene(char *SceneName)
     initBlockArray();
     initEdgeArray();
 
-    this->schedule(schedule_selector(ForeSceneManager::generateBlocks1), 0.1f);
+    this->schedule(schedule_selector(ForeSceneManager::generateBlocks1), 0.2f);
 }
 void ForeSceneManager::deleteAll()
 {
@@ -205,7 +205,7 @@ void ForeSceneManager::edgeManage(int height)
 
 void ForeSceneManager::monstorManage(int height)
 {
-    int lastHeight = 0;
+    int lastHeight = height;
 
     //Delete the monsters which is below the screen;
     vector<B2CCNode*>::iterator iter;
@@ -231,7 +231,31 @@ void ForeSceneManager::monstorManage(int height)
 
     if(height + m_screenSize.height > lastHeight)
     {
+       /* CCPoint point;
+        point.x = rand()%((int)m_screenSize.width - 100) + 50;
+        point.y = lastHeight + m_screenSize.height / 2 + rand()%((int)m_screenSize.height/2);
+        Monster *monster = getRandomMonsterFromScene(point);
+        m_screenContent->push_back(monster);*/
+        Block *block = NULL;
+        for(int i = m_screenContent->size() - 1; i > 0; --i)
+        {
+            if(TagHelper::Instance()->isObject(m_screenContent->at(i)->getTag(), ON_BLOCK))
+            {
+                block = dynamic_cast<Block*>(m_screenContent->at(i));
+                break;
+            }
+        }
 
+        if(block != NULL)
+        {
+            CCPoint point;
+            point = block->getB2NodePostion();
+
+            point.y += rand()%200 + 400;
+            Monster *monster = getRandomMonsterFromScene(point);
+            m_screenContent->push_back(monster);
+        }
+        
     }
 }
 
@@ -285,4 +309,38 @@ Block* ForeSceneManager::getRandomBlockFromScene()
     }
 
     return block;
+}
+
+Monster* ForeSceneManager::getRandomMonsterFromScene(CCPoint point)
+{
+    int ranNum = rand()%100 + 1;
+    Monster *monter = NULL;
+    xml_node<> *MonstersNode = m_presentScene->first_node("Monsters");
+
+    //we had a random num(range from 1 to 100, then we iterate this scene's Monsters node, find the first Monster which its value bigger than the random num)
+    for(xml_attribute<> *eachMonster = MonstersNode->first_attribute(); eachMonster != NULL; eachMonster = eachMonster->next_attribute())
+    {
+        if(atoi(eachMonster->value()) >= ranNum)
+        {
+            //this is the Monsternode we get from the scene.
+            xml_node<> * MonsterNode = GameConfig::Instance()->getFirstMonsterNode(eachMonster->name());
+            if(MonsterNode == NULL)
+            {
+                monter = NULL;
+                break;
+            }
+
+            //in current design, each Monster may have different Class use different class to init.
+            if(strcmp(MonsterNode->first_attribute("Class")->value(), "MonsterMushroom") == 0)
+            {
+                //Monster = RigidMonster::createRigidMonster(ccp(0, 0), CCSizeMake(50, 100), MonsterNode);
+                monter = MonsterMushroom::createMushroomWithConfigNode(m_layer, point, MonsterNode);
+                break;
+            }
+
+            break;
+        }
+    }
+
+    return monter;
 }

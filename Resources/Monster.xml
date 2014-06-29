@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Monsters>
-    <Monster1 Texture="Mushroom.png" Class="MonsterMushroom" Damege="10" Health="20" Defence="10" />
-    <Monster2 Texture="Mushroom.png" Class="MonsterMushroom" Damege="20" Health="10" Defence="10" />
+    <Mushroom1 Texture="Mushroom.png" Class="MonsterMushroom" Width="50" Height="50"
+               Damege="10" Health="20" Defence="10" />
+    <Mushroom2 Texture="Mushroom.png" Class="MonsterMushroom" Width="50" Height="50"
+               Damege="20" Health="10" Defence="10" />
 </Monsters>

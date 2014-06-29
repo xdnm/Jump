@@ -38,6 +38,22 @@ MonsterMushroom* MonsterMushroom::createMushroom(CCLayer *layer, CCPoint positio
     }
 }
 
+MonsterMushroom* MonsterMushroom::createMushroomWithConfigNode(CCLayer *layer,CCPoint position, xml_node<> *node)
+{
+    MonsterMushroom *pRet = new MonsterMushroom();
+    if(pRet != NULL && pRet->initMushroomWithConfigNode(layer,position, node))
+    {
+        pRet->autorelease();
+        return pRet;
+    }
+    else
+    {
+        delete pRet;
+        pRet = NULL;
+        return NULL;
+    }
+}
+
 bool MonsterMushroom::initMushroom(CCLayer *layer, CCPoint position, CCSize size, void *parm)
 {
     m_layer = layer;
@@ -57,7 +73,28 @@ bool MonsterMushroom::initMushroom(CCLayer *layer, CCPoint position, CCSize size
     createBody();
     return true;
 }
+bool MonsterMushroom::initMushroomWithConfigNode(CCLayer *layer,CCPoint position,  xml_node<> *node)
+{
+    m_layer = layer;
+    m_size = CCSizeMake( atoi(node->first_attribute("Width")->value()), atoi(node->first_attribute("Height")->value()));
+    this->setPosition(position);
+    m_layer->addChild(this);
 
+    m_texture = cocos2d::CCTextureCache::sharedTextureCache()->addImage(node->first_attribute("Texture")->value());
+    m_position = position;
+
+    //m_texture = cocos2d::CCTextureCache::sharedTextureCache()->addImage("mushroom.png");
+    m_textureCoords[0] = Vertex2DMake(0, 0);
+    m_textureCoords[1] = Vertex2DMake(1, 0);
+    m_textureCoords[2] = Vertex2DMake(0, 1);
+    m_textureCoords[3] = Vertex2DMake(1, 1);
+
+
+    initModel();
+
+    createBody();
+    return true;
+}
 bool MonsterMushroom::initModel()
 {
     if(m_model == NULL)
@@ -87,6 +124,7 @@ bool MonsterMushroom::createBody()
     fixtureDef.restitution = 1;
     fixtureDef.filter.categoryBits = BM_MONSTOR;
     fixtureDef.filter.maskBits = BM_ROLE | BM_WEAPON | BM_MONSTOR;
+    fixtureDef.filter.groupIndex = 2;
 
     b2BodyDef bodyDef;
     bodyDef.type = b2_staticBody;
@@ -170,15 +208,18 @@ bool MonsterMushroom::attacked(ObjectModel *model)
 
 bool MonsterMushroom::beenTrampled(ObjectModel *model)
 {
-
-    if(isReady())
-    {
-            CCLOG("tag : %d been trampled", this->getTag());
-        //this->m_model->beenAttackWithModel(model);
-        this->checkHealth();
+    if(!m_isReady)
+        return false;
+    CCLOG("tag : %d been trampled", this->getTag());
+    //this->m_model->beenAttackWithModel(model);
+    this->checkHealth();
        
-        this->scheduleOnce(schedule_selector(MonsterMushroom::setNotReady), 0.2f);
-    }
+    m_isReady = false;
+
+    CCDelayTime * delayAction = CCDelayTime::create(0.2f);  
+    CCCallFunc * callFunc = CCCallFunc::create(this, callfunc_selector(MonsterMushroom::setReady));  
+    this->runAction(CCSequence::createWithTwoActions(delayAction, callFunc)); 
+
     return true;
 }
 

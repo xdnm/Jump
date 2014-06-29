@@ -11,6 +11,8 @@
 #include "Utils/B2Handler.h"
 #include "Object/RoleObject.h"
 #include "Weapon/SwordWeapon.h"
+#include "Visual/BackgroundLayer.h"
+#include "Visual/MyCCMotionStreak.h"
 
 
 class HelloWorld : public cocos2d::CCLayer
@@ -53,12 +55,17 @@ public:
         return false;
     }
 
+public:
+        BackgroundLayer *m_background;
 private:
 	void worldTick(float dt);
 
 private:
 	b2World *m_world;
 	RoleObject *m_role;
+
+
+    MyCCMotionStreak *m_streak;
 };
 
 #endif // __HELLOWORLD_SCENE_H__

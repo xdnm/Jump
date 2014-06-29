@@ -35,6 +35,8 @@ public:
 
     xml_node<> *getFirstBlockNode(char *name = 0);
 
+    xml_node<> *getFirstMonsterNode(char *name = 0);
+
 private:
     GameConfig();
 

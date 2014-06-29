@@ -30,7 +30,7 @@ public:
     /**Whether this monster is ready is attack role and ready to beenTrample may be affect by many conditions
         overload this function is subclass */
     virtual bool isReady(){return m_isReady;};
-    void setNotReady(float dt);
+    void setReady();
 public:
     ObjectModel *m_model;
     CCLayer *m_layer;

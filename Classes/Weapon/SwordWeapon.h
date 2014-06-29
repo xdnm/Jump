@@ -39,6 +39,7 @@ private:
     b2Body *m_hookedBody;
     b2DistanceJointDef *m_jointDef;
 
+    CCMotionStreak *m_streak;
 public:
 private:
     CCTexture2D *m_texture;

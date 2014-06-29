@@ -2,10 +2,10 @@
 <Scenes>
     <Scene Name="PromiseLand" Level="1-1" ObjectLevel="1">
         <Blocks RigidBlock="100"/>
-        <Monster Mushroom1="50" Mushroom2="10"/>
+        <Monsters Mushroom1="50" Mushroom2="10"/>
     </Scene>
     <Scene Name="BoardLand" Level="1-2" ObjectLevel="1">
         <Blocks RigidBlock1="50" RigidBlock2="100"/>
-        <Monster Mushroom="100"/>
+        <Monsters Mushroom1="100"/>
     </Scene>
 </Scenes>
