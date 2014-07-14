@@ -35,5 +35,12 @@ enum GameTags
 
 };
 
+enum GameState
+{
+    GS_ONGOING,
+    GS_STOP,
+    GS_NEWGAME,
+    GS_DEADSTOP
+};
 
 #endif

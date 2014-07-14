@@ -1,3 +1,7 @@
+#ifndef __CIRCLE_LIGHT__
+#define __CIRCLE_LIGHT__
+
+//CirlieLight.h
 #include "cocos2d.h"
 
 USING_NS_CC;
@@ -36,6 +40,10 @@ private:
 
     int m_distance;
     CCLayer *m_watchLayer;
+    int m_initialHeight;
 
     CCPoint m_relativePosition;
+    
 };
+
+#endif

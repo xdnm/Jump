@@ -3,11 +3,23 @@
 RoleObject::RoleObject()
 {
     this->setTag(TagHelper::Instance()->getTag(ON_ROLE));
+    
+    //m_normalFaceDir = ""
 }
 RoleObject::~RoleObject()
 {
     if(m_model != NULL)
         delete m_model;
+
+    B2Helper::Instance()->putDeadPool(m_bottomBody);
+    B2Helper::Instance()->putDeadPool(m_innerBody);
+    B2Helper::Instance()->putDeadPool(m_topBoby);
+    B2Helper::Instance()->putDeadPool(m_leftBody);
+    B2Helper::Instance()->putDeadPool(m_rightBody);
+
+    this->removeAllChildren();
+
+    this->unscheduleAllSelectors();
 }
 
 RoleObject* RoleObject::CreateRole(b2World* world, void *parm)
@@ -43,6 +55,7 @@ bool RoleObject::initWithWorld(b2World* world, void *parm)
         m_length = 50.0f;
         m_Unit = m_length;
         m_faceLeft = true;
+        m_isFlying = false;
 
 		//fileds initialize part
 		m_innerBody = NULL;
@@ -56,20 +69,33 @@ bool RoleObject::initWithWorld(b2World* world, void *parm)
 		m_innerRadius = 0.0f;
 		m_outRadius = 0.0f;
 		//end fields initialize part
-
+        
+        m_acceleration.x = 0.0;
 		//world init
-		m_world = world;
+
+        m_world = world;
 		m_position = ccp(200, 400);
 
         m_bounce = false;
 
-        m_leftHandSprite = CCSprite::create();
-        m_rightHandSprite = CCSprite::create();
+        m_visiableNode = CCSprite::create();
+        this->addChild(m_visiableNode);
+
+
+
+        m_leftHandSprite = CCNode::create();
+        m_rightHandSprite = CCNode::create();
+        //m_leftHandSprite->retain();
+        //m_rightHandSprite->retain();
         //m_leftHandSprite->setScale(30/m_leftHandSprite->getContentSize().width);
         //m_rightHandSprite->setScale(40/m_leftHandSprite->getContentSize().width);
         this->addChild(m_leftHandSprite);
         this->addChild(m_rightHandSprite);
         
+        m_face = CCSprite::create("face_smile.png");
+        m_face->setScale(m_length * 2 / m_face->getContentSize().width);
+
+        this->m_visiableNode->addChild(m_face);
 
 		//render date init
 		m_textureCoords[0] = Vertex2DMake(0.0f, 0.0f);
@@ -78,7 +104,16 @@ bool RoleObject::initWithWorld(b2World* world, void *parm)
 		m_textureCoords[3] = Vertex2DMake(1.0f, 0.5f);
 		m_textureCoords[4] = Vertex2DMake(0.0f, 1.0f);
 		m_textureCoords[5] = Vertex2DMake(1.0f, 1.0f);
-		m_texture = cocos2d::CCTextureCache::sharedTextureCache()->addImage("role3.png");
+		m_texture = cocos2d::CCTextureCache::sharedTextureCache()->addImage("role_background.png");
+        cocos2d::CCTextureCache::sharedTextureCache()->addImage("face_aggressive.png");
+        cocos2d::CCTextureCache::sharedTextureCache()->addImage("face_amazing.png");
+        cocos2d::CCTextureCache::sharedTextureCache()->addImage("face_pain.png");
+        cocos2d::CCTextureCache::sharedTextureCache()->addImage("face_smile.png");
+        cocos2d::CCTextureCache::sharedTextureCache()->addImage("face_uppset.png");
+
+        
+        //cocos2d::CCTextureCache::sharedTextureCache()->addImage("role_background");
+        
         
 		//create the pysical body 
 		createBody(parm);
@@ -100,11 +135,16 @@ bool RoleObject::initWithWorld(b2World* world, void *parm)
         //after the weapon attach to role, we can init the role's biliboard
         
 
-        setFaceLeft(false);
+        setFaceLeft(true);
         this->scheduleUpdate();
+        this->schedule(schedule_selector(RoleObject::updateAcceleration), 0.1f);
         //B2Helper::Instance()->getWorld()->SetContactListener(this);
-
+  
         m_isProtected = false;
+        m_isJumping = false;
+
+        m_blockColliedFlag = false;
+        m_blockCollied = NULL;
 		break;
 	} while (1);
 
@@ -127,8 +167,7 @@ bool RoleObject::initModel()
     m_model->setFirm(5);
 
     //body sprite init
-    m_visiableNode = CCSprite::create();
-    this->addChild(m_visiableNode);
+
 
     this->m_mainBody = m_innerBody;
     m_model->m_B2Node = this;
@@ -186,6 +225,7 @@ void RoleObject::createBody(void *parm)
     m_bottomBody = m_world->CreateBody(&bodyDef);
     fixtureDef.filter.groupIndex = 2;
     m_bottomBody->CreateFixture(&fixtureDef);
+    m_bottomBody->SetBullet(true);
 
     //create left block
     fixtureDef.shape = &polyShapeVerticle;
@@ -302,6 +342,7 @@ void RoleObject::jump(float massRatio /* = 1.0f */)
 	b2Vec2 impulse = b2Vec2(0.0f, m_innerBody->GetMass() * massRatio);
     
     m_bounce = true;
+    m_isFlying = false;
 	//m_bottomBody->ApplyLinearImpulse(impulse, m_bottomBody->GetWorldCenter());
     //
 
@@ -430,17 +471,46 @@ void RoleObject::onCollied(b2Contact *contact, b2Body *bodyOther)
         //2. role is moving down and collisition happen by bottom body, enable = true;
         if(TagHelper::Instance()->isObject(otherNode->getTag(), ON_BLOCK))
         {
-           if(selfBody == m_bottomBody && selfBody->GetPosition().y > bodyOther->GetPosition().y && m_innerBody->GetLinearVelocity().y <= 0.0f)
-           {
-               jump();
-               isEnable = true;
-               break;
-           }
-           else
-           {
-               isEnable = false;
-               break;
-           }
+            if(selfBody == m_bottomBody && selfBody->GetPosition().y >= bodyOther->GetPosition().y)
+            {
+                if(m_innerBody->GetLinearVelocity().y < 0.0f)
+                    jump();
+                isEnable = true;
+                break;
+            }
+            else
+            {
+                isEnable = false;
+                break;
+            }
+            /*if(m_blockColliedFlag && m_blockCollied == bodyOther)
+            {
+            isEnable = true;
+            break;
+            }
+            else if(selfBody == m_bottomBody && selfBody->GetPosition().y > bodyOther->GetPosition().y && m_innerBody->GetLinearVelocity().y <= 0.0f)
+            {
+            m_blockColliedFlag = true;
+            m_blockCollied = bodyOther;
+
+            CCActionInterval *delay = CCDelayTime::create(0.5f);
+            CCCallFunc *callfunc = CCCallFunc::create(this,callfunc_selector(RoleObject::setColliedFlag));
+
+            CCFiniteTimeAction *seq = CCSequence::create(delay, callfunc, NULL);
+
+
+            this->runAction(seq);
+
+            jump();
+            isEnable = true;
+            break;
+            }
+            else
+            {
+            isEnable = false;
+            break;
+            }*/
+           
         }
         else if(TagHelper::Instance()->isObject(otherNode->getTag(), ON_MONSTOR))
         {
@@ -454,7 +524,7 @@ void RoleObject::onCollied(b2Contact *contact, b2Body *bodyOther)
                 if(monster->isReady())
                 {
                     monster->beenTrampled(m_model);
-                    jump();
+                    //jump();
                 }
             }
             else 
@@ -475,6 +545,10 @@ void RoleObject::onCollied(b2Contact *contact, b2Body *bodyOther)
             break;
         }
 
+        if(m_innerBody->GetPosition().y * PTM_RATIO <= m_length + 5)
+        {
+            m_innerBody->SetLinearVelocity(b2Vec2(0, 30));
+        }
     } while (0);
 
     contact->SetEnabled(isEnable);
@@ -483,6 +557,9 @@ void RoleObject::onCollied(b2Contact *contact, b2Body *bodyOther)
 }
 void RoleObject::update(float delta)
 {
+    if(!m_weapon->isHooked())
+        passingBorder(m_innerBody->GetPosition().x * PTM_RATIO);
+
     m_visiableNode->setPosition(ccp(m_innerBody->GetPosition().x * PTM_RATIO, m_innerBody->GetPosition().y * PTM_RATIO));
 
     m_position = ccp(m_innerBody->GetPosition().x * PTM_RATIO, m_innerBody->GetPosition().y * PTM_RATIO);
@@ -505,12 +582,41 @@ void RoleObject::update(float delta)
     else
         m_rightHandSprite->setRotation(CC_RADIANS_TO_DEGREES(radians) - 90);
 
+    if(m_innerBody->GetPosition().y * PTM_RATIO <= m_length + 10)
+    {
+        m_innerBody->ApplyLinearImpulse(b2Vec2(0.0f, m_innerBody->GetMass() * 1000), m_innerBody->GetWorldCenter());
+        tryLaunchParticle(delta);
+        GUILayer::Instance()->clearRolePower();
+        m_bounce = false;
+    }
+
     if(m_bounce)
     {
         if(abs(m_innerBody->GetLinearVelocity().y) < 5)
         {
-            m_innerBody->ApplyLinearImpulse(b2Vec2(0.0f, m_innerBody->GetMass() * 50), m_innerBody->GetWorldCenter());
-            m_bounce = false;
+            //this 100 is magic num which should be same with the max power defined in the PowerColum
+            if(GUILayer::Instance()->getRolePower() < 100)
+            {
+                m_innerBody->ApplyLinearImpulse(b2Vec2(0.0f, m_innerBody->GetMass() * 50), m_innerBody->GetWorldCenter());
+                m_isJumping = true;
+                //tryLaunchParticle(ccp(m_bottomBody->GetPosition().x * PTM_RATIO, m_bottomBody->GetPosition().y * PTM_RATIO));
+                //m_emitPoint = ccp(m_bottomBody->GetPosition().x * PTM_RATIO, m_bottomBody->GetPosition().y * PTM_RATIO);
+                //this->scheduleOnce(schedule_selector(RoleObject::tryLaunchParticle), 0.1f);
+                tryLaunchParticle(delta);
+
+                GUILayer::Instance()->onRoleJumping();
+                m_bounce = false;
+            }
+            else if(GUILayer::Instance()->getRolePower() >= 100)
+            {
+                m_innerBody->ApplyLinearImpulse(b2Vec2(0.0f, m_innerBody->GetMass() * 1000), m_innerBody->GetWorldCenter());
+                tryLaunchParticle(delta);
+                GUILayer::Instance()->clearRolePower();
+                m_bounce = false;
+                m_isJumping = true;
+
+            }
+            
         }
     }
     
@@ -518,8 +624,9 @@ void RoleObject::update(float delta)
 
 bool RoleObject::attack()
 {
+    runChangeFaceAction("face_aggressive.png", 2.0f);
     m_weapon->attackAction();
-    //jump(5.0f);
+    jump(5.0f);
     //setFaceLeft(!m_faceLeft);
     return true;
 }
@@ -545,7 +652,7 @@ void RoleObject::setFaceLeft(bool isFaceLeft)
 {
     if(m_weapon->isHooked())
         return;
-
+    m_face->setFlipX(!isFaceLeft);
     if(m_faceLeft == !isFaceLeft)
     {
         b2Body *tempBody;
@@ -555,6 +662,8 @@ void RoleObject::setFaceLeft(bool isFaceLeft)
 
         m_faceLeft = isFaceLeft;
         m_weapon->setIsFaceLeft(isFaceLeft);
+        
+     
     }
 }
 
@@ -562,6 +671,7 @@ void RoleObject::beenAttacked(Monster *monster)
 {
     if(isProtected() == false)
     {
+        runChangeFaceAction("face_pain.png", 2.0f);
         monster->attacked(m_model);
         //this->scheduleOnce(schedule_selector(RoleObject::setUnProtected), 1.0f);
         CCActionInterval * blink = CCBlink ::create(1, 20);
@@ -579,6 +689,10 @@ void RoleObject::onAttacking(b2Contact *contact, b2Body* otherBody)
         return;
     
     m_weapon->interationWithOther(contact, otherBody, m_onTouchDown);
+
+    m_isFlying = true;
+
+    
 }
 bool RoleObject::isProtected()
 {
@@ -592,7 +706,7 @@ void RoleObject::setUnProtected()
 bool RoleObject::onTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
 {
     m_onTouchDown = true;
-    this->jump(5.0f);
+    //this->jump(5.0f);
     this->attack();
     return true;
 }
@@ -618,8 +732,15 @@ bool RoleObject::onTouchMoved(CCTouch *pTouch, CCEvent *pEvent)
 
 void RoleObject::setLinearVecByAcceleration(CCAcceleration* pAccelerationValue)
 {
+    CCLog("set linear ");
     if(m_weapon->isHooked())
         return;
+    if(m_isFlying)
+    {
+        
+        //m_innerBody->SetLinearVelocity()
+        return;
+    }
 
     float x = pAccelerationValue->x;
     //TODO the maxVecx parm can be affected by this model's agility.
@@ -638,5 +759,146 @@ void RoleObject::setLinearVecByAcceleration(CCAcceleration* pAccelerationValue)
     }
 
     m_innerBody->SetLinearVelocity(b2Vec2(x * maxVecX, m_innerBody->GetLinearVelocity().y));
+    CCLog("Role x Velocity : %f", x * maxVecX);
+}
 
+void RoleObject::changeFace(CCNode *node, void* pFile)
+{
+    m_face->initWithFile((char*)pFile);
+    m_face->setScale(m_length * 2 / m_face->getContentSize().width);
+}
+
+void RoleObject::runChangeFaceAction(char* pFile, float dt)
+{
+    m_face->stopAllActions();
+
+    CCCallFuncND *face1Func = CCCallFuncND::create(this, callfuncND_selector(RoleObject::changeFace), pFile);
+    face1Func->setDuration(dt);
+    char *filedir = "face_smile.png";
+    CCCallFuncND *face1Normal = CCCallFuncND::create(this, callfuncND_selector(RoleObject::changeFace), filedir);
+    
+    CCFiniteTimeAction *seq = CCSequence::create(face1Func, face1Normal, NULL); 
+    this->runAction(seq);
+
+}
+
+void RoleObject::setWorldPosition(CCPoint position)
+{
+    if(m_faceLeft)
+    {
+        m_topBoby->SetTransform(b2Vec2(position.x/PTM_RATIO, (position.y + m_outRadius)/PTM_RATIO), 0.0f);
+        m_bottomBody->SetTransform(b2Vec2(position.x/PTM_RATIO, (position.y - m_outRadius)/PTM_RATIO), 0.0f);
+        m_leftBody->SetTransform(b2Vec2((position.x - m_outRadius)/PTM_RATIO, position.y/PTM_RATIO), 0.0f);
+        m_rightBody->SetTransform(b2Vec2((position.x + m_outRadius)/PTM_RATIO, position.y/PTM_RATIO), 0.0f);
+        m_innerBody->SetTransform(b2Vec2(position.x/PTM_RATIO, position.y/PTM_RATIO), 0.0f);
+    }
+    else
+    {
+        m_topBoby->SetTransform(b2Vec2(position.x/PTM_RATIO, (position.y + m_outRadius)/PTM_RATIO), 0.0f);
+        m_bottomBody->SetTransform(b2Vec2(position.x/PTM_RATIO, (position.y - m_outRadius)/PTM_RATIO), 0.0f);
+        m_rightBody->SetTransform(b2Vec2((position.x - m_outRadius)/PTM_RATIO, position.y/PTM_RATIO), 0.0f);
+        m_leftBody->SetTransform(b2Vec2((position.x + m_outRadius)/PTM_RATIO, position.y/PTM_RATIO), 0.0f);
+        m_innerBody->SetTransform(b2Vec2(position.x/PTM_RATIO, position.y/PTM_RATIO), 0.0f);
+    }
+
+
+    setB2NodePostion(position);
+}
+
+void RoleObject::resetRole()
+{
+    setWorldPosition(ccp(CCDirector::sharedDirector()->getVisibleSize().width/2, 200));
+
+    update(1);
+}
+
+bool RoleObject::passingBorder(int xPosition)
+{
+    CCLog("Role xPosition : %d", xPosition);
+    int safeOffset = 10;
+    CCSize size = CCDirector::sharedDirector()->getVisibleSize();
+    if(xPosition < -m_length - safeOffset)
+    {
+        CCPoint position = ccp(m_innerBody->GetPosition().x * PTM_RATIO, m_innerBody->GetPosition().y * PTM_RATIO);
+        this->setWorldPosition(ccp(size.width + m_length, position.y));
+
+        return true;
+    }
+    else if(xPosition >size.width + m_length + safeOffset)
+    {
+        CCPoint position = ccp(m_innerBody->GetPosition().x * PTM_RATIO, m_innerBody->GetPosition().y * PTM_RATIO);
+
+        this->setWorldPosition(ccp(-m_length, position.y));
+
+        return true;
+    }
+
+    return false;
+}
+
+void RoleObject::tryLaunchParticle(float dt)
+{
+    CCParticleSystemQuad *particle = CCParticleSystemQuad::create("particle1.plist");
+    particle->setAnchorPoint(ccp(0.5f, 0.5));
+    particle->setPosition(ccp(m_bottomBody->GetPosition().x * PTM_RATIO, m_bottomBody->GetPosition().y * PTM_RATIO));
+    particle->setAutoRemoveOnFinish(true);
+    this->addChild(particle);
+
+}
+
+void RoleObject::setAcceleration(CCAcceleration *acceleration)
+{
+    m_acceleration = *acceleration;
+}
+
+void RoleObject::updateAcceleration(float dt)
+{
+    CCLog("update accleration");
+    if(m_weapon->isHooked())
+        return;
+
+    b2Vec2 speed = m_innerBody->GetLinearVelocity();
+    float x ;
+    x = m_acceleration.x;
+        
+ 
+    //TODO the maxVecx parm can be affected by this model's agility.
+    float maxVecX = 30.0f;
+
+    if(x > -0.1f && x < 0.1f)
+        x = 0.0f;
+
+    if(x > 0)
+    {
+        this->setFaceLeft(false);
+    }
+    else if (x < 0)
+    {
+        this->setFaceLeft(true);
+    }
+
+    float speedX = speed.x;
+    if(abs(speed.x) <= 0.5)
+        speed.x = 0.0f;
+    CCLog("x: %f, speed.x:%f", x, speed.x);
+    if(x * speed.x < 0)
+    {
+        /*speedX = speedX + x * 60;
+        speedX = clampf(speedX, -30.0f, 30.0f);*/
+        m_innerBody->SetLinearVelocity(b2Vec2(0.0f, speed.y));
+    }
+    else
+    {
+        speedX = speedX + x * 20;
+        speedX = clampf(speedX, -30.0f, 30.0f);
+        m_innerBody->SetLinearVelocity(b2Vec2(speedX, speed.y));
+    }
+
+   
+    //m_innerBody->SetLinearVelocity(b2Vec2(speedX, speed.y));
+}
+
+void RoleObject::setColliedFlag()
+{
+    m_blockColliedFlag = false;
 }

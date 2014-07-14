@@ -15,8 +15,7 @@ CCScene* HelloWorld::scene()
     scene->addChild(layer);
 
     BackgroundLayer *background = BackgroundLayer::createBackground(scene, layer);
-    
-	
+	GUILayer              *gui = GUILayer::createGUILayerWithScene(scene, layer);
     // return the scene
     return scene;
 }
@@ -42,37 +41,8 @@ bool HelloWorld::init()
     // 2. add a menu item with "X" image, which is clicked to quit the program
     //    you may modify it.
 
-    // add a "close" icon to exit the progress. it's an autorelease object
-    CCMenuItemImage *pCloseItem = CCMenuItemImage::create(
-                                        "CloseNormal.png",
-                                        "CloseSelected.png",
-                                        this,
-                                        menu_selector(HelloWorld::menuCloseCallback));
-    
-	pCloseItem->setPosition(ccp(origin.x + visibleSize.width - pCloseItem->getContentSize().width/2 ,
-                                origin.y + pCloseItem->getContentSize().height/2));
 
-    // create menu, it's an autorelease object
-    CCMenu* pMenu = CCMenu::create(pCloseItem, NULL);
-    pMenu->setPosition(CCPointZero);
-    this->addChild(pMenu, 1);
-
-    /////////////////////////////
-    // 3. add your codes below...
-
-    // add a label shows "Hello World"
-    // create and initialize a label
-    
-    CCLabelTTF* pLabel = CCLabelTTF::create("Hello World", "Arial", 24);
-    
-    // position the label on the center of the screen
-    pLabel->setPosition(ccp(origin.x + visibleSize.width/2,
-                            origin.y + visibleSize.height - pLabel->getContentSize().height));
-
-    // add the label as a child to this layer
-    this->addChild(pLabel, 1);
-
-
+    m_role = NULL;
 
 
 	//--------------init world-------------------------
@@ -81,13 +51,13 @@ bool HelloWorld::init()
 	//world = new b2World()
 	m_world = new b2World(gravity);
 	m_world->SetAllowSleeping(true);
-	GLESDebugDraw *debugDrawFlag;
-	debugDrawFlag = new GLESDebugDraw(PTM_RATIO);
-	m_world->SetDebugDraw(debugDrawFlag);
-	uint32	flags = 0;
-	flags += b2Draw::e_shapeBit;
+    GLESDebugDraw *debugDrawFlag;
+    debugDrawFlag = new GLESDebugDraw(PTM_RATIO);
+    m_world->SetDebugDraw(debugDrawFlag);
+    uint32	flags = 0;
+    flags += b2Draw::e_shapeBit;
     flags += b2Draw::e_jointBit;
-	debugDrawFlag->SetFlags(flags);
+    debugDrawFlag->SetFlags(flags);
 	B2Helper::Instance()->setWorld(m_world);
 
     //--------------end init world----------------------
@@ -119,16 +89,11 @@ bool HelloWorld::init()
 	
 	//end test block---------------------------------------------
 
-	//--------------set role----------------------------
-	m_role = RoleObject::CreateRole(m_world, NULL);
-	this->addChild(m_role, 10);
-    m_role->createDamegeNum(ccp(0, 100), 1000);
-	//--------------end set role------------------------
 
 
     //--------------test region-------------------------
 	
-    int height = 0;
+    /*int height = 0;
     for(int i = 0; i < 100; i++)
     {
         CCSprite *tempSprite = CCSprite::create("CloseNormal.png");
@@ -141,23 +106,27 @@ bool HelloWorld::init()
     this->addChild((CCNode*)mush);
     
     m_streak = MyCCMotionStreak::create(0.5f, 3.0f, 10, ccWHITE, "CloseNormal.png");
-    m_streak->setFollowNode(m_role, m_role->m_weapon, ccp(50, 200));
+    m_streak->setFollowNode(m_role, m_role->m_weapon, ccp(50, 200));*/
+
+    //m_guiLayer = GUILayer::createGUILayer(this);
+
     //this->addChild(m_streak);
     
     //body->ApplyForce(b2Vec2(10.0f, 0), body->GetWorldCenter());
     //body->ApplyForce(b2Vec2(0, body->GetMass() * gravity.Length()) , body->GetWorldCenter());
 
+    createNewGame();
 	//--------------end test region--------------------
 
 
 	//--------------Register region--------------------------
     ForeSceneManager::Instance()->setWatchLayer(this);
-    ForeSceneManager::Instance()->createNewScene("PromiseLand");
+    //ForeSceneManager::Instance()->createNewScene("PromiseLand");
     B2Handler::createB2Handler(m_world);
 	this->schedule(schedule_selector(HelloWorld::worldTick));
 	CCDirector::sharedDirector()->getTouchDispatcher()->addTargetedDelegate(this, 0, true);
     this->setAccelerometerEnabled(true);
-    this->runAction(JumpFollow::create(m_role->m_visiableNode));
+    
 	//--------------end register region---------------------
     return true;
 }
@@ -187,13 +156,12 @@ void HelloWorld::menuCloseCallback(CCObject* pSender)
 
 void HelloWorld::worldTick(float dt)
 {
+    if(m_state != GS_ONGOING)
+        return;
+
     B2Helper::Instance()->bodiesListener(dt);
 	m_world->Step(dt, 8, 8);
     
-    //m_streak->setPosition(m_role->m_weapon->convertToWorldSpace(m_role->m_weapon->getPosition()));
-    CCPoint point = this->convertToNodeSpace(m_role->m_weapon->convertToWorldSpace(ccp(0, 0)));
-    //m_streak->DestroySelf();
-    CCLog("(%f, %f)", point.x, point.y);
 }
 
 bool HelloWorld::ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
@@ -220,9 +188,10 @@ void HelloWorld::ccTouchMoved(CCTouch *pTouch, CCEvent *pEvent)
 }
 void HelloWorld::didAccelerate(CCAcceleration* pAccelerationValue)
 {
-    b2Vec2 gravity (pAccelerationValue->x * 50, pAccelerationValue->y * 60);
-    //m_world->SetGravity(gravity);
-    m_role->setLinearVecByAcceleration(pAccelerationValue);
+   /* b2Vec2 gravity (pAccelerationValue->x * 100, pAccelerationValue->y * 100);
+    m_world->SetGravity(gravity);*/
+   
+    m_role->setAcceleration(pAccelerationValue);
     //CCLog("Current acceleration is : (%f, %f).", pAccelerationValue->x, pAccelerationValue->y );
 }
 
@@ -252,4 +221,54 @@ void HelloWorld::copyData(const char* pFileName)
     fclose(fp);
     delete []data;
     data = NULL;
+}
+
+void HelloWorld::createWelcome()
+{
+
+}
+
+void HelloWorld::createNewGame()
+{
+    //--------------set role----------------------------
+   
+
+    m_role = RoleObject::CreateRole(m_world, NULL);
+    m_role->setWorldPosition(ccp(300, 200));
+    this->addChild(m_role, 10);
+    this->stopAllActions();
+    this->runAction(JumpFollow::create(m_role->m_visiableNode));
+    ForeSceneManager::Instance()->createNewScene("PromiseLand");
+
+    
+    this->setPositionY(0.0f);
+
+    this->setGameState(GS_ONGOING);
+    //
+    
+    
+    
+    //--------------end set role------------------------
+
+}
+
+void HelloWorld::reset()
+{
+    if(m_role != NULL && m_role->getParent() != NULL)
+    {
+        m_role->setWorldPosition(ccp(100, 100));
+        this->setPositionY(0.0f);
+        m_role->update(1.0f);
+        ForeSceneManager::Instance()->createNewScene("PromiseLand");
+        return;
+    }
+}
+
+void HelloWorld::setGameState(GameState state)
+{
+    m_state = state;
+    if(m_state == GS_ONGOING)
+    {
+        
+    }
 }

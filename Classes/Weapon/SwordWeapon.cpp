@@ -93,6 +93,8 @@ bool SwordWeapon::hook(b2Contact *contact, b2Body *otherBody)
     if(m_isHooked)
         return false;
 
+    GUILayer::Instance()->onRoleHooking();
+
     CCLog("began hook!");
     if(m_onAttacking)
         endDamege();
@@ -107,14 +109,37 @@ bool SwordWeapon::hook(b2Contact *contact, b2Body *otherBody)
     this->setRotation(0.0f);
     userdata->addChild(this);
     
-    m_jointDef= new b2DistanceJointDef();
+    b2DistanceJointDef *distanceJoint = new b2DistanceJointDef();
+    distanceJoint= new b2DistanceJointDef();
+    b2WorldManifold *maniFold = new b2WorldManifold();
+    contact->GetWorldManifold(maniFold);
+    distanceJoint->collideConnected = true;
+    distanceJoint->dampingRatio = 0.1f;
+    distanceJoint->frequencyHz = 4.0f;
+    distanceJoint->Initialize(m_hookRoleBody, otherBody, m_hookRoleBody->GetWorldCenter(), maniFold->points[0]);
+    distanceJoint->length = 120.0f / PTM_RATIO;
+
+    /*b2RopeJointDef *ropeJoint = new b2RopeJointDef();
+    ropeJoint->bodyA = m_hookRoleBody;
+    ropeJoint->bodyB = otherBody;
+    ropeJoint->localAnchorA = m_hookRoleBody->GetWorldCenter();
+    ropeJoint->localAnchorB = maniFold->points[0];
+    ropeJoint->maxLength = 120.0/PTM_RATIO;*/
+
+
+    m_jointDef = distanceJoint;
+    B2Helper::Instance()->putJointPool(m_jointDef);
+  /*  m_jointDef= new b2DistanceJointDef();
     b2WorldManifold *maniFold = new b2WorldManifold();
     contact->GetWorldManifold(maniFold);
     m_jointDef->collideConnected = true;
     m_jointDef->dampingRatio = 0.1f;
     m_jointDef->frequencyHz = 4.0f;
     m_jointDef->Initialize(m_hookRoleBody, otherBody, m_hookRoleBody->GetWorldCenter(), maniFold->points[0]);
+    m_jointDef->length = 120.0f / PTM_RATIO;
     B2Helper::Instance()->putJointPool(m_jointDef);
+*/
+    
 
     this->schedule(schedule_selector(SwordWeapon::updateWeapon));
     delete maniFold;

@@ -3,7 +3,7 @@
 
 #include "Weapon/Weapon.h"
 #include "Object/Monster.h"
-
+#include "Visual/GUILayer.h"
 class SwordWeapon : public Weapon
 {
 public:
@@ -33,11 +33,13 @@ public:
     void updateWeapon(float dt);
 
     BiliBoard* interationWithOther(b2Contact *contact, b2Body* otherBody, bool onTouching);
+
+
 private:
     SwordWeapon();
     b2Body *m_hookRoleBody;
     b2Body *m_hookedBody;
-    b2DistanceJointDef *m_jointDef;
+    b2JointDef *m_jointDef;
 
     CCMotionStreak *m_streak;
 public:

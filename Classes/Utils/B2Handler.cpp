@@ -96,7 +96,7 @@ void B2Handler::colliedDispatcher(b2Contact *contact)
     }
     else
     {
-        B2CCNode *b2node;
+        //B2CCNode *b2node;
         if(nodeA != NULL)
             dynamic_cast<B2CCNode*>(nodeA)->onCollied(contact, bodyB);
 

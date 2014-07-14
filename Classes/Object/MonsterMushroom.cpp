@@ -18,7 +18,6 @@ MonsterMushroom::~MonsterMushroom()
 
     if(m_bottomBody != NULL)
         B2Helper::Instance()->putDeadPool(m_bottomBody);
-
 }
 
 MonsterMushroom* MonsterMushroom::createMushroom(CCLayer *layer, CCPoint position, CCSize size, void *parm)

@@ -27,11 +27,15 @@ public:
 	void draw();
 
 	void onCollied(b2Contact *contact, b2Body *bodyOther);
+    bool tryLaunchParticle(CCPoint emitPoint);
+
+    void update(float dt);
 private:
 	bool initWithPointSize(CCPoint point, CCSize size, void *parm);
     bool initWithConfigNode(xml_node<> *node);
 	bool createBody();
 	bool initRenderData();
+
 
     void makeRoleJump(float dt);
 protected:
@@ -44,6 +48,8 @@ private:
 	//render data
 	Vertex2D m_textCoord[4];
 	Vertex2D m_vertexCoord[4];
+
+    float m_time;
 };
 
 #endif

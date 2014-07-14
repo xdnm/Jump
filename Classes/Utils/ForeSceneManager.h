@@ -3,6 +3,7 @@
 #include "Utils/TagHelper.h"
 #include "Object/RigidBlock.h"
 #include "Object/RigidEdge.h"
+#include "Object/RubberBlock.h"
 #include "Object/MonsterMushroom.h"
 #include "GameConfig.h"
 USING_NS_CC;

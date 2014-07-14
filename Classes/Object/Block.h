@@ -15,6 +15,7 @@ public:
 	Block();
 	virtual void setAlive(bool flag){};
 	virtual bool setBlockPosition(cocos2d::CCPoint position){return true;};
+    virtual bool tryLaunchParticle(CCPoint emitPoint){return true;};
 
 private:
 	virtual bool createBody(){return true;};

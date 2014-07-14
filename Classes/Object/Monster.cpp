@@ -39,6 +39,7 @@ bool Monster::checkHealth()
     {
         CCLOG("monter tag: %d is dead!", this->getTag());
         m_layer->removeChild(this);
+
         return true;
     }
     return false;

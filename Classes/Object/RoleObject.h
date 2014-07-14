@@ -11,7 +11,9 @@
 #include "Utils/TagHelper.h"
 #include "Weapon/SwordWeapon.h"
 #include "Object/Monster.h"
+#include "Object/Block.h"
 #include "Model/ObjectModel.h"
+#include "Visual/GUILayer.h"
 USING_NS_CC;
 
 class RoleObject: public B2CCNode
@@ -39,9 +41,18 @@ public:
 
     void setLinearVecByAcceleration(CCAcceleration* pAccelerationValue);
 
+    void setWorldPosition(CCPoint m_position);
+
+    void resetRole();
+
+    void update(float delta);
+
+    void setAcceleration(CCAcceleration *acceleration);
+
+    void updateAcceleration(float dt);
 private:
 	RoleObject();
-    void update(float delta);
+
 
 	bool initWithWorld(b2World* world, void *parm);
 
@@ -60,7 +71,14 @@ private:
     bool isProtected();
     void setUnProtected();
 
+    void changeFace(CCNode *node, void* pFile);
+    void runChangeFaceAction(char* pFile, float dt);
 
+    bool passingBorder(int xPosition);
+
+    void tryLaunchParticle(float dt);
+
+    void setColliedFlag();
 public:
     //ccnode for layer to follow or other things
     CCNode *m_node;
@@ -90,8 +108,9 @@ private:
 	Vertex2D m_vertexCoords[6];
 	Vertex2D m_textureCoords[6];
 	
-    CCSprite *m_leftHandSprite;
-    CCSprite *m_rightHandSprite;
+    CCNode *m_leftHandSprite;
+    CCNode *m_rightHandSprite;
+    CCSprite *m_face;
 
 
 
@@ -103,6 +122,18 @@ private:
     bool m_onTouchDown;
 
     bool m_isProtected;
+
+    bool m_isFlying;
+    bool m_isJumping;
+
+    bool m_blockColliedFlag;
+    b2Body *m_blockCollied;
+
+    CCPoint m_emitPoint;
+    
+    char *m_normalFaceDir;
+
+    CCAcceleration m_acceleration;
 };
 
 #endif;

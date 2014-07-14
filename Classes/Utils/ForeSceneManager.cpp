@@ -2,7 +2,7 @@
 
 ForeSceneManager::ForeSceneManager()
 {
-    m_unitHeight = CCDirector::sharedDirector()->getVisibleSize().height / 15;
+    m_unitHeight = CCDirector::sharedDirector()->getVisibleSize().height / 25;
     m_screenContent = new vector<B2CCNode*>();
 
     m_blockArray = CCArray::create();
@@ -29,13 +29,20 @@ void ForeSceneManager::createNewScene(char *SceneName)
 
     m_blockArray->removeAllObjects();
     m_edgeArray->removeAllObjects();
-    
+
+    for(int i = 0; i < m_screenContent->size(); i++)
+    {
+        CCNode *node = dynamic_cast<CCNode*>(m_screenContent->at(i));
+        if(node != NULL)
+            m_layer->removeChild(node);
+    }
     m_screenContent->clear();
+    
 
     initBlockArray();
     initEdgeArray();
 
-    this->schedule(schedule_selector(ForeSceneManager::generateBlocks1), 0.2f);
+    this->schedule(schedule_selector(ForeSceneManager::generateBlocks1));
 }
 void ForeSceneManager::deleteAll()
 {
@@ -72,8 +79,8 @@ void ForeSceneManager::generateBlocks1(float dt)
 {
     int height = -m_layer->getPositionY();
     blocksManage(height);
-    edgeManage(height);
-    monstorManage(height);
+    //edgeManage(height);
+    //monstorManage(height);
 }
 void ForeSceneManager::generateBlocks(int layyerPositionY)
 {
@@ -81,7 +88,7 @@ void ForeSceneManager::generateBlocks(int layyerPositionY)
 
     edgeManage(-layyerPositionY);
 
-    monstorManage(-layyerPositionY);
+    //monstorManage(-layyerPositionY);
 }
 
 void ForeSceneManager::blocksManage(int height)
@@ -287,7 +294,7 @@ Block* ForeSceneManager::getRandomBlockFromScene()
     //we had a random num(range from 1 to 100, then we iterate this scene's blocks node, find the first block which its value bigger than the random num)
     for(xml_attribute<> *eachBlock = blocksNode->first_attribute(); eachBlock != NULL; eachBlock = eachBlock->next_attribute())
     {
-        if(atoi(eachBlock->value()) > ranNum)
+        if(atoi(eachBlock->value()) >= ranNum)
         {
             //this is the blocknode we get from the scene.
             xml_node<> * blockNode = GameConfig::Instance()->getFirstBlockNode(eachBlock->name());
@@ -303,11 +310,19 @@ Block* ForeSceneManager::getRandomBlockFromScene()
                 //block = RigidBlock::createRigidBlock(ccp(0, 0), CCSizeMake(50, 100), blockNode);
                block = RigidBlock::createWithConfigNode(blockNode);
             }
+            else if(strcmp(blockNode->first_attribute("Class")->value(), "RubberBlock") == 0)
+            {
+                block = RubberBlock::createWithConfigNode(blockNode);
+            }
+
 
              break;
         }
     }
-
+    if(block == NULL)
+    {
+        return NULL;
+    }
     return block;
 }
 
@@ -316,7 +331,7 @@ Monster* ForeSceneManager::getRandomMonsterFromScene(CCPoint point)
     int ranNum = rand()%100 + 1;
     Monster *monter = NULL;
     xml_node<> *MonstersNode = m_presentScene->first_node("Monsters");
-
+    
     //we had a random num(range from 1 to 100, then we iterate this scene's Monsters node, find the first Monster which its value bigger than the random num)
     for(xml_attribute<> *eachMonster = MonstersNode->first_attribute(); eachMonster != NULL; eachMonster = eachMonster->next_attribute())
     {

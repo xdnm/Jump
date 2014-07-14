@@ -77,6 +77,7 @@ bool RigidBlock::initWithConfigNode(xml_node<> *node)
 
     setAlive(false);
 
+    //this->scheduleUpdate();
     return true;
 }
 
@@ -111,7 +112,7 @@ void RigidBlock::onB2PositionChanged()
     setAlive(true);
 
     m_polyBody->SetTransform(b2Vec2(m_position.x/PTM_RATIO, m_position.y/PTM_RATIO), 0.0f);
-
+    //tryLaunchParticle(m_position);
 }
 
 void RigidBlock::interationWithOther(b2Body* otherBody)
@@ -160,10 +161,11 @@ bool RigidBlock::initRenderData()
 }
 
 void RigidBlock::draw()
-{
+{   
 	if(!m_isAlive)
-		return ;
+		return;
 
+    ccGLBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     m_vertexCoord[0] = Vertex2DMake((m_position.x - m_size.width/2), (m_position.y + m_size.height/2) );
     m_vertexCoord[1] = Vertex2DMake((m_position.x + m_size.width/2), (m_position.y + m_size.height/2));
     m_vertexCoord[2] = Vertex2DMake((m_position.x - m_size.width/2), (m_position.y - m_size.height/2) );
@@ -187,7 +189,7 @@ void RigidBlock::draw()
 
 void RigidBlock::onCollied(b2Contact *contact, b2Body *bodyOther)
 {
-
+    //tryLaunchParticle();
  //   if(!contact->IsEnabled())
  //       return;
 	////this->setAlive(false);
@@ -202,3 +204,21 @@ void RigidBlock::onCollied(b2Contact *contact, b2Body *bodyOther)
  //   }
 }
 
+bool RigidBlock::tryLaunchParticle(CCPoint emitPoint)
+{
+
+    CCParticleSystemQuad *particle = CCParticleSystemQuad::create("NewBlockParticle_1.plist");
+    particle->setAnchorPoint(ccp(0.5f, 0.5));
+    particle->setPosition(m_position);
+    particle->setAutoRemoveOnFinish(true);
+    
+    
+    this->addChild(particle);
+
+    return true;
+}
+
+void RigidBlock::update(float dt)
+{
+    m_time += dt;
+}

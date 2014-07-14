@@ -13,6 +13,8 @@
 #include "Weapon/SwordWeapon.h"
 #include "Visual/BackgroundLayer.h"
 #include "Visual/MyCCMotionStreak.h"
+#include "Visual/ScoreBoard.h"
+#include "Visual/GUILayer.h"
 
 
 class HelloWorld : public cocos2d::CCLayer
@@ -55,8 +57,33 @@ public:
         return false;
     }
 
+    void setIsStop(bool stop)
+    {
+        if(stop)
+        {
+            this->unschedule(schedule_selector(HelloWorld::worldTick));
+        }
+        else
+        {
+            this->schedule(schedule_selector(HelloWorld::worldTick), 0.1f);
+        }
+    }
+
 public:
         BackgroundLayer *m_background;
+        GUILayer *m_guiLayer;
+
+        void createWelcome();
+        void createNewGame();
+        inline B2CCNode* GetRole()
+        {
+            return m_role;
+        }
+
+        void reset();
+
+        void setGameState(GameState state);
+
 private:
 	void worldTick(float dt);
 
@@ -66,6 +93,8 @@ private:
 
 
     MyCCMotionStreak *m_streak;
+
+    GameState m_state;
 };
 
 #endif // __HELLOWORLD_SCENE_H__
