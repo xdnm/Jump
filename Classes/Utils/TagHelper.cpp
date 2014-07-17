@@ -25,6 +25,9 @@ int TagHelper::getTag(ObjectName name)
     case ON_MONSTOR:
         tagRet = 6;
         break;
+    case ON_PILLS:
+        tagRet = 7;
+        break;
     default:
         tagRet = 0;
     }
@@ -61,6 +64,11 @@ bool TagHelper::isObject(int tag, ObjectName name)
             break;
     case ON_MONSTOR:
         if(tag == 6)
+            ret = true;
+        break;
+
+    case ON_PILLS:
+        if(tag == 7)
             ret = true;
         break;
     default:

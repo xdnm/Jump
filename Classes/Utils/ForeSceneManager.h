@@ -5,6 +5,7 @@
 #include "Object/RigidEdge.h"
 #include "Object/RubberBlock.h"
 #include "Object/MonsterMushroom.h"
+#include "Object/Pills.h"
 #include "GameConfig.h"
 USING_NS_CC;
 
@@ -47,6 +48,7 @@ private:
     void blocksManage(int height);
     void edgeManage(int height);
     void monstorManage(int height);
+    void pillManage(int height);
 
     B2CCNode* getTopObject(int tag);
     B2CCNode* getBottomObject(int tag);
@@ -64,4 +66,6 @@ private:
 
     vector<B2CCNode*> *m_screenContent;
     int m_unitHeight;
+
+    int m_lastPillHeight;
 };

@@ -38,10 +38,11 @@ void ForeSceneManager::createNewScene(char *SceneName)
     }
     m_screenContent->clear();
     
-
+    
     initBlockArray();
     initEdgeArray();
 
+    m_lastPillHeight = 0;
     this->schedule(schedule_selector(ForeSceneManager::generateBlocks1));
 }
 void ForeSceneManager::deleteAll()
@@ -79,6 +80,7 @@ void ForeSceneManager::generateBlocks1(float dt)
 {
     int height = -m_layer->getPositionY();
     blocksManage(height);
+    pillManage(height);
     //edgeManage(height);
     //monstorManage(height);
 }
@@ -264,6 +266,47 @@ void ForeSceneManager::monstorManage(int height)
         }
         
     }
+}
+
+void ForeSceneManager::pillManage(int height)
+{
+    int upperHeight = height + m_screenSize.height;
+    if(upperHeight > m_lastPillHeight + 2000)
+    {
+        if(CCRANDOM_0_1() > 0.5f)
+        {
+            int typeNum = rand()%4;
+            PillType type;
+            switch (typeNum)
+            {
+            case 0:
+                type = PT_RED;
+                break;
+            case 1:
+                type = PT_BLUE;
+                break;
+            case 2:
+                type = PT_YELLOW;
+                break;
+            case 3:
+                type = PT_GREEN;
+                break;
+            default:
+                type = PT_RED;
+                break;
+            }
+            int width = m_screenSize.width;
+            Pill *pill = Pill::createPillWithType(type, ccp(rand()%width, upperHeight));
+            m_layer->addChild(pill);
+            m_lastPillHeight = upperHeight;
+
+        }
+        else
+        {
+            m_lastPillHeight = m_lastPillHeight + 1000;
+        }
+    }
+
 }
 
 B2CCNode *ForeSceneManager::nameProject(char *name)

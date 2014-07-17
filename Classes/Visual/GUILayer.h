@@ -32,7 +32,15 @@ public:
     void clearRolePower();
 
     void textAnimationEnd(CCNode *node);
+
+    void addBouns(int bouns);
+
+    void runBounsAction();
+
+    void decreaseScoreRatio();
 protected:
+
+
     GUILayer();
 
 

@@ -145,6 +145,8 @@ bool RoleObject::initWithWorld(b2World* world, void *parm)
 
         m_blockColliedFlag = false;
         m_blockCollied = NULL;
+
+        m_gotLastPill = NULL;
 		break;
 	} while (1);
 
@@ -206,7 +208,7 @@ void RoleObject::createBody(void *parm)
     fixtureDef.restitution = 0.5f;
     fixtureDef.friction = 1.0f;
     fixtureDef.filter.categoryBits = BM_ROLE;
-    fixtureDef.filter.maskBits = BM_MONSTOR | BM_BLOCK | BM_EDGE;
+    fixtureDef.filter.maskBits = BM_MONSTOR | BM_BLOCK | BM_PILLS;
 
 
     b2BodyDef bodyDef;
@@ -544,6 +546,15 @@ void RoleObject::onCollied(b2Contact *contact, b2Body *bodyOther)
             isEnable = false;
             break;
         }
+        else if(TagHelper::Instance()->isObject(otherNode->getTag(), ON_PILLS))
+        {
+            Pill *temp = dynamic_cast<Pill *>(otherNode);
+            if(temp != NULL)
+                this->gotPill(temp->getType(), temp);
+
+            isEnable = false;
+            break;
+        }
 
         if(m_innerBody->GetPosition().y * PTM_RATIO <= m_length + 5)
         {
@@ -559,6 +570,63 @@ void RoleObject::update(float delta)
 {
     if(!m_weapon->isHooked())
         passingBorder(m_innerBody->GetPosition().x * PTM_RATIO);
+    
+    if(m_gotLastPill != NULL)
+    {
+        switch(m_gotLastPill->getType())
+        {
+        case PT_BLUE:
+        gotBluePill();
+        //m_gotPillType = PT_BLUE;
+        break;
+        case PT_RED:
+        gotRedPill();
+        //m_gotPillType = PT_RED;
+        break;
+        case PT_GREEN:
+        gotGreenPill();
+        // m_gotPillType = PT_GREEN;
+        break;
+        case PT_YELLOW:
+        gotYellowPill();
+        //m_gotPillType = PT_YELLOW;
+        break;
+        default:
+        m_gotPillType = PT_NONE;
+        break;
+        }
+
+        m_gotLastPill->removeFromParent();
+        m_gotLastPill = NULL;
+    }
+
+    //if(m_gotPillType != PT_NONE)
+    //{
+    //    switch(m_gotPillType)
+    //    {
+    //    case PT_BLUE:
+    //        gotBluePill();
+    //        //m_gotPillType = PT_BLUE;
+    //        break;
+    //    case PT_RED:
+    //        gotRedPill();
+    //        //m_gotPillType = PT_RED;
+    //        break;
+    //    case PT_GREEN:
+    //        gotGreenPill();
+    //       // m_gotPillType = PT_GREEN;
+    //        break;
+    //    case PT_YELLOW:
+    //        gotYellowPill();
+    //        //m_gotPillType = PT_YELLOW;
+    //        break;
+    //    default:
+    //        m_gotPillType = PT_NONE;
+    //        break;
+    //    }
+
+    //    m_gotPillType = PT_NONE;
+    //}
 
     m_visiableNode->setPosition(ccp(m_innerBody->GetPosition().x * PTM_RATIO, m_innerBody->GetPosition().y * PTM_RATIO));
 
@@ -597,23 +665,11 @@ void RoleObject::update(float delta)
             //this 100 is magic num which should be same with the max power defined in the PowerColum
             if(GUILayer::Instance()->getRolePower() < 100)
             {
-                m_innerBody->ApplyLinearImpulse(b2Vec2(0.0f, m_innerBody->GetMass() * 50), m_innerBody->GetWorldCenter());
-                m_isJumping = true;
-                //tryLaunchParticle(ccp(m_bottomBody->GetPosition().x * PTM_RATIO, m_bottomBody->GetPosition().y * PTM_RATIO));
-                //m_emitPoint = ccp(m_bottomBody->GetPosition().x * PTM_RATIO, m_bottomBody->GetPosition().y * PTM_RATIO);
-                //this->scheduleOnce(schedule_selector(RoleObject::tryLaunchParticle), 0.1f);
-                tryLaunchParticle(delta);
-
-                GUILayer::Instance()->onRoleJumping();
-                m_bounce = false;
+                smallJump(m_smallJumpRatio);
             }
             else if(GUILayer::Instance()->getRolePower() >= 100)
             {
-                m_innerBody->ApplyLinearImpulse(b2Vec2(0.0f, m_innerBody->GetMass() * 1000), m_innerBody->GetWorldCenter());
-                tryLaunchParticle(delta);
-                GUILayer::Instance()->clearRolePower();
-                m_bounce = false;
-                m_isJumping = true;
+                superJump(m_superJumpRatio);
 
             }
             
@@ -626,8 +682,10 @@ bool RoleObject::attack()
 {
     runChangeFaceAction("face_aggressive.png", 2.0f);
     m_weapon->attackAction();
-    jump(5.0f);
+    //jump(5.0f);
     //setFaceLeft(!m_faceLeft);
+
+    SoundManager::Instance()->makeEffect(EF_WAVE);
     return true;
 }
 
@@ -652,16 +710,37 @@ void RoleObject::setFaceLeft(bool isFaceLeft)
 {
     if(m_weapon->isHooked())
         return;
-    m_face->setFlipX(!isFaceLeft);
+    
     if(m_faceLeft == !isFaceLeft)
     {
-        b2Body *tempBody;
-        tempBody = m_leftBody;
-        m_leftBody = m_rightBody;
-        m_rightBody = tempBody;
-
         m_faceLeft = isFaceLeft;
-        m_weapon->setIsFaceLeft(isFaceLeft);
+        m_face->setFlipX(!isFaceLeft);
+        //b2Body *tempBody;
+        //tempBody = m_leftBody;
+        //m_leftBody = m_rightBody;
+        //m_rightBody = tempBody;
+
+        if(m_faceLeft && m_leftBody->GetPosition().x > m_rightBody->GetPosition().x)
+        {
+            b2Body *tempBody;
+            tempBody = m_leftBody;
+            m_leftBody = m_rightBody;
+            m_rightBody = tempBody;
+            m_weapon->setIsFaceLeft(isFaceLeft);
+            return ;
+        }
+        if (!m_faceLeft && m_leftBody->GetPosition().x < m_rightBody->GetPosition().x)
+        {
+            b2Body *tempBody;
+            tempBody = m_leftBody;
+            m_leftBody = m_rightBody;
+            m_rightBody = tempBody;
+            m_weapon->setIsFaceLeft(isFaceLeft);
+            return;
+        }
+
+
+        
         
      
     }
@@ -727,12 +806,19 @@ bool RoleObject::onTouchEnded(CCTouch *pTouch, CCEvent *pEvent)
 
 bool RoleObject::onTouchMoved(CCTouch *pTouch, CCEvent *pEvent)
 {
+    if(m_weapon->isHooked() && !B2Helper::Instance()->getWorld()->IsLocked())
+    {
+        CCPoint dir =pTouch->getLocationInView() - pTouch->getStartLocationInView(); 
+
+        m_innerBody->ApplyForce(b2Vec2(dir.x * 5, dir.y * 5), m_innerBody->GetWorldCenter());
+        CCLog("touch move dir : x: %f, y:%f", dir.x, dir.y);
+    }
     return true;
 }
 
 void RoleObject::setLinearVecByAcceleration(CCAcceleration* pAccelerationValue)
 {
-    CCLog("set linear ");
+    //CCLog("set linear ");
     if(m_weapon->isHooked())
         return;
     if(m_isFlying)
@@ -759,13 +845,13 @@ void RoleObject::setLinearVecByAcceleration(CCAcceleration* pAccelerationValue)
     }
 
     m_innerBody->SetLinearVelocity(b2Vec2(x * maxVecX, m_innerBody->GetLinearVelocity().y));
-    CCLog("Role x Velocity : %f", x * maxVecX);
+    //CCLog("Role x Velocity : %f", x * maxVecX);
 }
 
 void RoleObject::changeFace(CCNode *node, void* pFile)
 {
     m_face->initWithFile((char*)pFile);
-    m_face->setScale(m_length * 2 / m_face->getContentSize().width);
+    m_face->setScale(50 * 2 / m_face->getContentSize().width);
 }
 
 void RoleObject::runChangeFaceAction(char* pFile, float dt)
@@ -782,24 +868,46 @@ void RoleObject::runChangeFaceAction(char* pFile, float dt)
 
 }
 
-void RoleObject::setWorldPosition(CCPoint position)
+void RoleObject::setWorldPosition(CCPoint position, bool newBodyFlag /* = true */)
 {
-    if(m_faceLeft)
-    {
-        m_topBoby->SetTransform(b2Vec2(position.x/PTM_RATIO, (position.y + m_outRadius)/PTM_RATIO), 0.0f);
-        m_bottomBody->SetTransform(b2Vec2(position.x/PTM_RATIO, (position.y - m_outRadius)/PTM_RATIO), 0.0f);
-        m_leftBody->SetTransform(b2Vec2((position.x - m_outRadius)/PTM_RATIO, position.y/PTM_RATIO), 0.0f);
-        m_rightBody->SetTransform(b2Vec2((position.x + m_outRadius)/PTM_RATIO, position.y/PTM_RATIO), 0.0f);
-        m_innerBody->SetTransform(b2Vec2(position.x/PTM_RATIO, position.y/PTM_RATIO), 0.0f);
-    }
-    else
-    {
-        m_topBoby->SetTransform(b2Vec2(position.x/PTM_RATIO, (position.y + m_outRadius)/PTM_RATIO), 0.0f);
-        m_bottomBody->SetTransform(b2Vec2(position.x/PTM_RATIO, (position.y - m_outRadius)/PTM_RATIO), 0.0f);
-        m_rightBody->SetTransform(b2Vec2((position.x - m_outRadius)/PTM_RATIO, position.y/PTM_RATIO), 0.0f);
-        m_leftBody->SetTransform(b2Vec2((position.x + m_outRadius)/PTM_RATIO, position.y/PTM_RATIO), 0.0f);
-        m_innerBody->SetTransform(b2Vec2(position.x/PTM_RATIO, position.y/PTM_RATIO), 0.0f);
-    }
+    b2Vec2 linearVec = m_innerBody->GetLinearVelocity();
+
+   m_position = position;
+  /* B2Helper::Instance()->putDeadPool(m_innerBody);
+   B2Helper::Instance()->putDeadPool(m_bottomBody);
+   B2Helper::Instance()->putDeadPool(m_topBoby);
+   B2Helper::Instance()->putDeadPool(m_leftBody);
+   B2Helper::Instance()->putDeadPool(m_rightBody);*/
+
+   if(newBodyFlag)
+   {
+       B2Helper::Instance()->getWorld()->DestroyBody(m_innerBody);
+       B2Helper::Instance()->getWorld()->DestroyBody(m_bottomBody);
+       B2Helper::Instance()->getWorld()->DestroyBody(m_topBoby);
+       B2Helper::Instance()->getWorld()->DestroyBody(m_leftBody);
+       B2Helper::Instance()->getWorld()->DestroyBody(m_rightBody);
+
+
+       createBody(NULL);
+   }
+   else
+   {
+      
+
+       B2Helper::Instance()->getWorld()->DestroyBody(m_innerBody);
+       B2Helper::Instance()->getWorld()->DestroyBody(m_bottomBody);
+       B2Helper::Instance()->getWorld()->DestroyBody(m_topBoby);
+       B2Helper::Instance()->getWorld()->DestroyBody(m_leftBody);
+       B2Helper::Instance()->getWorld()->DestroyBody(m_rightBody);
+
+
+       createBody(NULL);
+ 
+   }
+
+   m_innerBody->SetLinearVelocity(linearVec);
+   this->m_mainBody = m_innerBody;
+
 
 
     setB2NodePostion(position);
@@ -807,20 +915,29 @@ void RoleObject::setWorldPosition(CCPoint position)
 
 void RoleObject::resetRole()
 {
+    m_length = 50;
+    m_outRadius = m_length;
+
+    B2Helper::Instance()->setMass(m_innerBody, 10);
+    m_smallJumpRatio = 50;
+    m_superJumpRatio = 1000;
+
     setWorldPosition(ccp(CCDirector::sharedDirector()->getVisibleSize().width/2, 200));
+
+    setFaceLeft(true);
 
     update(1);
 }
 
 bool RoleObject::passingBorder(int xPosition)
 {
-    CCLog("Role xPosition : %d", xPosition);
+    //CCLog("Role xPosition : %d", xPosition);
     int safeOffset = 10;
     CCSize size = CCDirector::sharedDirector()->getVisibleSize();
     if(xPosition < -m_length - safeOffset)
     {
         CCPoint position = ccp(m_innerBody->GetPosition().x * PTM_RATIO, m_innerBody->GetPosition().y * PTM_RATIO);
-        this->setWorldPosition(ccp(size.width + m_length, position.y));
+        this->setWorldPosition(ccp(size.width + m_length, position.y), false);
 
         return true;
     }
@@ -828,7 +945,7 @@ bool RoleObject::passingBorder(int xPosition)
     {
         CCPoint position = ccp(m_innerBody->GetPosition().x * PTM_RATIO, m_innerBody->GetPosition().y * PTM_RATIO);
 
-        this->setWorldPosition(ccp(-m_length, position.y));
+        this->setWorldPosition(ccp(-m_length, position.y), false);
 
         return true;
     }
@@ -838,11 +955,13 @@ bool RoleObject::passingBorder(int xPosition)
 
 void RoleObject::tryLaunchParticle(float dt)
 {
-    CCParticleSystemQuad *particle = CCParticleSystemQuad::create("particle1.plist");
+    CCParticleSystemQuad *particle = CCParticleSystemQuad::create("particle_role.plist");
     particle->setAnchorPoint(ccp(0.5f, 0.5));
-    particle->setPosition(ccp(m_bottomBody->GetPosition().x * PTM_RATIO, m_bottomBody->GetPosition().y * PTM_RATIO));
+    particle->setPosition(ccp(0.0f, -m_length * 2));
     particle->setAutoRemoveOnFinish(true);
-    this->addChild(particle);
+    particle->setDuration(dt);
+   
+    this->m_visiableNode->addChild(particle);
 
 }
 
@@ -853,7 +972,7 @@ void RoleObject::setAcceleration(CCAcceleration *acceleration)
 
 void RoleObject::updateAcceleration(float dt)
 {
-    CCLog("update accleration");
+    //CCLog("update accleration");
     if(m_weapon->isHooked())
         return;
 
@@ -880,7 +999,7 @@ void RoleObject::updateAcceleration(float dt)
     float speedX = speed.x;
     if(abs(speed.x) <= 0.5)
         speed.x = 0.0f;
-    CCLog("x: %f, speed.x:%f", x, speed.x);
+    //CCLog("x: %f, speed.x:%f", x, speed.x);
     if(x * speed.x < 0)
     {
         /*speedX = speedX + x * 60;
@@ -901,4 +1020,139 @@ void RoleObject::updateAcceleration(float dt)
 void RoleObject::setColliedFlag()
 {
     m_blockColliedFlag = false;
+}
+
+void RoleObject::superJump(int massRadio)
+{
+    m_innerBody->ApplyLinearImpulse(b2Vec2(0.0f, m_innerBody->GetMass() * massRadio), m_innerBody->GetWorldCenter());
+    tryLaunchParticle(massRadio/1000.0f);
+    GUILayer::Instance()->clearRolePower();
+    m_bounce = false;
+    m_isJumping = true;
+
+    SoundManager::Instance()->makeEffect(EF_SUPERJUMP);
+    CCCallFunc *endJump = CCCallFunc::create(this, callfunc_selector(RoleObject::superJumpEnded));
+    CCFiniteTimeAction *seq = CCSequence::create(CCDelayTime::create(massRadio/1000.0), endJump, NULL);
+    this->runAction(seq);
+}
+
+void RoleObject::superJumpEnded()
+{
+    SoundManager::Instance()->getEngine()->stopAllEffects();
+}
+void RoleObject::smallJump(int massRadio)
+{
+    m_innerBody->ApplyLinearImpulse(b2Vec2(0.0f, m_innerBody->GetMass() * massRadio), m_innerBody->GetWorldCenter());
+    m_isJumping = true;
+    //tryLaunchParticle(ccp(m_bottomBody->GetPosition().x * PTM_RATIO, m_bottomBody->GetPosition().y * PTM_RATIO));
+    //m_emitPoint = ccp(m_bottomBody->GetPosition().x * PTM_RATIO, m_bottomBody->GetPosition().y * PTM_RATIO);
+    //this->scheduleOnce(schedule_selector(RoleObject::tryLaunchParticle), 0.1f);
+    tryLaunchParticle(0.2f);
+
+    GUILayer::Instance()->onRoleJumping();
+    m_bounce = false;
+
+    SoundManager::Instance()->makeEffect(EF_JUMP);
+}
+
+void RoleObject::gotPill(PillType pillType, Pill *thepill)
+{
+
+    //switch (pillType)
+    //{
+    //case PT_BLUE:
+    //    m_gotLastPill = thepill;
+    //    break;
+    //case PT_RED:
+    //    //gotRedPill();
+    //    m_gotPillType = PT_RED;
+    //    break;
+    //case PT_GREEN:
+    //    //gotGreenPill();
+    //    m_gotPillType = PT_GREEN;
+    //    break;
+    //case PT_YELLOW:
+    //    //gotYellowPill();
+    //    m_gotPillType = PT_YELLOW;
+    //    break;
+    //default:
+    //    m_gotPillType = PT_NONE;
+    //    break;
+    //}
+    //thepill->removeFromParent();
+    static Pill* lastPill = NULL;
+    if(lastPill == thepill)
+        return ;
+    else
+    {
+        m_gotLastPill = thepill;
+        lastPill = m_gotLastPill;
+        GUILayer::Instance()->addBouns(100);
+        SoundManager::Instance()->makeEffect(EF_PILL);
+    }
+
+    
+    
+}
+
+void RoleObject::gotBluePill()
+{
+    m_superJumpRatio *= 1.2f;
+
+    CCParticleSystemQuad *particle = CCParticleSystemQuad::create("particle_pill.plist");
+    particle->setAnchorPoint(ccp(0.5f, 0.5f));
+    particle->setPosition(ccp(0, 0));
+    particle->setAutoRemoveOnFinish(true);
+    particle->setStartColor(ccc4FFromccc3B(ccBLUE));
+    particle->setContentSize(CCSizeMake(100, 100));
+    particle->setDuration(0.2f);
+    m_visiableNode->addChild(particle);
+}
+void RoleObject::gotYellowPill()
+{
+    //B2Helper::Instance()->setMass(m_innerBody, m_innerBody->GetMass() * 0.9);
+    GUILayer::Instance()->decreaseScoreRatio();
+
+    CCParticleSystemQuad *particle = CCParticleSystemQuad::create("particle_pill.plist");
+    particle->setAnchorPoint(ccp(0.5f, 0.5f));
+    particle->setPosition(ccp(0, 0));
+    particle->setAutoRemoveOnFinish(true);
+    particle->setStartColor(ccc4FFromccc3B(ccYELLOW));
+    particle->setContentSize(CCSizeMake(100, 100));
+    particle->setDuration(0.2f);
+    m_visiableNode->addChild(particle);
+}
+void RoleObject::gotRedPill()
+{
+    m_length += 1.2;
+    m_outRadius = m_length;
+    //b2Vec2 linearVec = m_innerBody->GetLinearVelocity();
+    B2Helper::Instance()->setMass(m_innerBody, m_innerBody->GetMass() * 1.05f);
+    this->setWorldPosition(m_position);
+
+    this->m_mainBody = m_innerBody;
+
+    //m_innerBody->SetLinearVelocity(linearVec);
+
+    CCParticleSystemQuad *particle = CCParticleSystemQuad::create("particle_pill.plist");
+    particle->setAnchorPoint(ccp(0.5f, 0.5f));
+    particle->setPosition(ccp(0, 0));
+    particle->setAutoRemoveOnFinish(true);
+    particle->setStartColor(ccc4FFromccc3B(ccRED));
+    particle->setContentSize(CCSizeMake(100, 100));
+    particle->setDuration(0.2f);
+    m_visiableNode->addChild(particle);
+}
+void RoleObject::gotGreenPill()
+{
+    m_smallJumpRatio += 5;
+
+    CCParticleSystemQuad *particle = CCParticleSystemQuad::create("particle_pill.plist");
+    particle->setAnchorPoint(ccp(0.5f, 0.5f));
+    particle->setPosition(ccp(0, 0));
+    particle->setAutoRemoveOnFinish(true);
+    particle->setStartColor(ccc4FFromccc3B(ccGREEN));
+    particle->setContentSize(CCSizeMake(100, 100));
+    particle->setDuration(0.2f);
+    m_visiableNode->addChild(particle);
 }

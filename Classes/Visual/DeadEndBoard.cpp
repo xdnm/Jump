@@ -62,12 +62,13 @@ bool DeadEndBoard::initDeadEndBoard(int score)
     
     this->scheduleUpdate();
     m_texture = CCTextureCache::sharedTextureCache()->addImage("transparent.png")->getName();
-    CCLog("GL_COPY : %f, %f, %f, %f", m_screenRect.origin.x, m_screenRect.origin.y, m_screenRect.size.width, m_screenRect.size.height);
+    //CCLog("GL_COPY : %f, %f, %f, %f", m_screenRect.origin.x, m_screenRect.origin.y, m_screenRect.size.width, m_screenRect.size.height);
     ccGLBindTexture2D(m_texture);
     glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_screenRect.origin.x, m_screenRect.origin.y, m_screenRect.size.width, m_screenRect.size.height, 0);
 
     loadShader();
 
+    SoundManager::Instance()->makeEffect(EF_END);
     return true;
 }
 

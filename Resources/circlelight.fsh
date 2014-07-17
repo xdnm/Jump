@@ -17,8 +17,8 @@ void main(void)
 	time = abs(time - timeCircle/2.0);
 	if(dis < u_radius)
 	{
-		alpha =1- smoothstep(u_innerRadius, u_radius, dis);
-		//alpha = alpha * clamp((time + 1) / timeCircle/2.0, 0.0f, 1.0f);
+		alpha =1.0- smoothstep(u_innerRadius, u_radius, dis);
+		//alpha = alpha * clamp((time + 1.0) / timeCircle/2.0, 0.0f, 1.0f);
 		alpha = alpha * (time / timeCircle/2.0f +u_alphaParm);
 		//gl_FragColor = vec4(1.0, 0.0, 0.0, alpha);
 		gl_FragColor = vec4(u_color.rgb, alpha);

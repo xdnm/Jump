@@ -93,6 +93,7 @@ bool SwordWeapon::hook(b2Contact *contact, b2Body *otherBody)
     if(m_isHooked)
         return false;
 
+    SoundManager::Instance()->makeEffect(EF_HOOK);
     GUILayer::Instance()->onRoleHooking();
 
     CCLog("began hook!");
@@ -103,6 +104,7 @@ bool SwordWeapon::hook(b2Contact *contact, b2Body *otherBody)
     m_isHooked = true;
     m_hookedBody = otherBody;
     
+    m_hookRoleBody = m_roleModel->m_B2Node->m_mainBody;
     //remove this weapon from hand, use the hookBody and hookedBody updating its position and rotation.
     m_hand->removeChild(this, false);
     this->setPosition(ccp(0, 0));
@@ -325,11 +327,9 @@ void SwordWeapon::endDamege()
 
 void SwordWeapon::update(float delta)
 {
-    /* CCLog("Weapon position in node coords: (%f, %f)", this->getPositionX(), this->getPositionY());
-    CCPoint point = this->convertToWorldSpace(this->getPosition());
-    CCLog("Weapon position in world coords: (%f, %f)", point.x, point.y);*/
-    CCPoint point = this->convertToWorldSpace(this->getPosition());
-    CCLog("Weapon position in world coords: (%f, %f)", point.x, point.y);
+    this->m_hookRoleBody = m_roleModel->m_B2Node->m_mainBody;
+    //CCPoint point = this->convertToWorldSpace(this->getPosition());
+    //CCLog("Weapon position in world coords: (%f, %f)", point.x, point.y);
 }
 
 void SwordWeapon::updateAttackArea(float delta)
@@ -387,7 +387,3 @@ BiliBoard* SwordWeapon::interationWithOther(b2Contact *contact, b2Body* otherBod
 
     return NULL;
 }
-
-
-
-

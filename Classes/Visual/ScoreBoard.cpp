@@ -65,7 +65,7 @@ void ScoreBoard::scoreUpdate(float dt)
 
 void ScoreBoard::reset()
 {
-    m_lastBonus = 10;
+    m_lastBonus = 100;
     m_scoreRate = 20;
     m_sumScore = 0;
     m_bonusSumScore = 0;
@@ -75,17 +75,18 @@ void ScoreBoard::addBonus(int bouns /* = 0 */)
 {
     if(bouns == 0)
     {
-        m_lastBonus = m_lastBonus * 1.3f;
+        m_lastBonus = m_lastBonus * 2.0f;
         m_bonusSumScore += m_lastBonus;
     }
     else
     {
         //m_lastBonus += bouns;
-        m_bonusSumScore += m_lastBonus;
+        m_bonusSumScore += bouns;
     }
 }
 
 void ScoreBoard::clearBonus()
 {
-    m_lastBonus = 10;
+    m_lastBonus = 100;
 }
+

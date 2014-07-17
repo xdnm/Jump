@@ -122,7 +122,7 @@ bool RubberBlock::createBody()
     fixtureDef.friction = 0.5;
     fixtureDef.restitution = 1;
     fixtureDef.filter.categoryBits = BM_BLOCK;
-    fixtureDef.filter.maskBits = BM_ROLE | BM_WEAPON | BM_BLOCK;
+    fixtureDef.filter.maskBits =  BM_WEAPON | BM_BLOCK;
     //fixtureDef.filter.groupIndex = 2;
 
     b2BodyDef bodyDef;
@@ -138,6 +138,7 @@ bool RubberBlock::createBody()
     bodyDef.type = b2_dynamicBody;
     bodyDef.fixedRotation = false;
     
+    fixtureDef.filter.maskBits = BM_ROLE | BM_BLOCK;
 
     m_topBody = B2Helper::Instance()->getWorld()->CreateBody(&bodyDef);
     m_topBody->CreateFixture(&fixtureDef);

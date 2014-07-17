@@ -2,8 +2,8 @@
 <Blocks>
     <RigidBlock1 Class="RigidBlock" Texture="rigidblock.png" Height="50" Width="150"/>
     <RigidBlock2 Class="RubberBlock" Texture="rect1.png" Height="50" Width="150"/>
-    <RigidBlock3 Class="RubberBlock" Texture="block.png" Height="50" Width="150"/>
-    <RigidBlock4 Class="RubberBlock" Texture="block1.png" Height="50" Width="150"/>
-    <RigidBlock5 Class="RubberBlock" Texture="block2.png" Height="50" Width="150"/>
-    <RigidBlock6 Class="RubberBlock" Texture="block3.png" Height="50" Width="150"/>
+    <RigidBlock3 Class="RubberBlock" Texture="clouds1.png" Height="50" Width="150"/>
+    <RigidBlock4 Class="RubberBlock" Texture="clouds2.png" Height="50" Width="150"/>
+    <RigidBlock5 Class="RubberBlock" Texture="clouds3.png" Height="50" Width="150"/>
+    <RigidBlock6 Class="RubberBlock" Texture="clouds4.png" Height="50" Width="150"/>
 </Blocks>

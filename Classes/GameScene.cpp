@@ -1,10 +1,15 @@
 #include "GameScene.h"
 
+
+
 GameScene::GameScene()
 {
     welcome();
     CCDirector::sharedDirector()->getTouchDispatcher()->addTargetedDelegate(this, 0, false);
 
+    this->setKeypadEnabled(true);
+
+    m_label = NULL;
 }
 
 GameScene::~GameScene()
@@ -69,6 +74,7 @@ void GameScene::setGameState(GameState state)
 
 void GameScene::welcome()
 {
+    SoundManager::Instance();
     CreateNewScene(NULL);
     this->setGameState(GS_NEWGAME);
 
@@ -93,6 +99,9 @@ bool GameScene::ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
     else if(m_state == GS_STOP)
     {
         setGameState(GS_ONGOING);
+
+        m_label->removeFromParent();
+        m_label = NULL;
     }
     else if(m_state == GS_DEADSTOP)
     {
@@ -116,6 +125,29 @@ void GameScene::ccTouchEnded(CCTouch *pTouch, CCEvent *pEvent)
 void GameScene::ccTouchMoved(CCTouch *pTouch, CCEvent *pEvent)
 {
 
+}
+
+void GameScene::keyBackClicked(){
+    CCLog("Android- KeyBackClicked!");
+    if(this->m_state == GS_ONGOING)
+    {
+        this->setGameState(GS_STOP);
+
+        CCSize size = CCDirector::sharedDirector()->getVisibleSize();
+        m_label = CCLabelAtlas::create("0", "fonts/Text2.plist");
+        m_label->setAnchorPoint(ccp(0.5f, 0.5f));
+        m_label->setScale((size.width/10) /m_label->getContentSize().height);
+        m_label->setPosition(ccp(size.width/2, size.height/2));
+        m_label->setColor(ccRED);
+        m_label->setString("Pause");
+        this->addChild(m_label, 10);
+
+        
+    }
+}
+
+void GameScene::keyMenuClicked(){
+    CCLog("Android- keyMenuClicked!");
 }
 
 void GameScene::roleDead()

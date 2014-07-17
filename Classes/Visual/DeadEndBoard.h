@@ -2,6 +2,7 @@
 #define __DEADEND_BOARD__
 
 #include "cocos2d.h"
+#include "Utils/SoundManager.h"
 USING_NS_CC;
 
 class DeadEndBoard : public CCSprite

@@ -9,11 +9,14 @@
 #include "Utils/GlobalData.h"
 #include "Utils/B2WorldHelper.h"
 #include "Utils/TagHelper.h"
+#include "Utils/SoundManager.h"
 #include "Weapon/SwordWeapon.h"
 #include "Object/Monster.h"
 #include "Object/Block.h"
 #include "Model/ObjectModel.h"
 #include "Visual/GUILayer.h"
+#include "Pills.h"
+
 USING_NS_CC;
 
 class RoleObject: public B2CCNode
@@ -41,7 +44,7 @@ public:
 
     void setLinearVecByAcceleration(CCAcceleration* pAccelerationValue);
 
-    void setWorldPosition(CCPoint m_position);
+    void setWorldPosition(CCPoint position, bool newBodyFlag = true);
 
     void resetRole();
 
@@ -79,6 +82,19 @@ private:
     void tryLaunchParticle(float dt);
 
     void setColliedFlag();
+
+    void superJump(int massRadio);
+    void smallJump(int massRadio);
+
+    void superJumpEnded();
+
+    void gotPill(PillType pillType, Pill *thepill);
+ 
+
+    void gotBluePill();
+    void gotRedPill();
+    void gotYellowPill();
+    void gotGreenPill();
 public:
     //ccnode for layer to follow or other things
     CCNode *m_node;
@@ -134,6 +150,12 @@ private:
     char *m_normalFaceDir;
 
     CCAcceleration m_acceleration;
+
+    int m_smallJumpRatio;
+    int m_superJumpRatio;
+
+    PillType m_gotPillType;
+    Pill *m_gotLastPill;
 };
 
 #endif;

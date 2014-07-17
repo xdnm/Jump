@@ -11,7 +11,8 @@ enum ObjectName
     ON_EDGE,
     ON_WEAPON,
     ON_ATTACK,
-    ON_MONSTOR
+    ON_MONSTOR,
+    ON_PILLS
 };
 
 class TagHelper

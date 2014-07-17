@@ -16,6 +16,8 @@
 #include "Visual/ScoreBoard.h"
 #include "Visual/GUILayer.h"
 
+#include "Object/Pills.h"
+
 
 class HelloWorld : public cocos2d::CCLayer
 {

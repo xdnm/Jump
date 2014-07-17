@@ -88,7 +88,8 @@ enum Box2dMask
     BM_ROLE = 0x0002,
     BM_BLOCK = 0x0004,
     BM_MONSTOR = 0x0008,
-    BM_WEAPON = 0x0010
+    BM_WEAPON = 0x0010,
+    BM_PILLS = 0x0020
 };
 class ICollideable
 {

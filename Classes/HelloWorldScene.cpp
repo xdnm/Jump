@@ -51,13 +51,13 @@ bool HelloWorld::init()
 	//world = new b2World()
 	m_world = new b2World(gravity);
 	m_world->SetAllowSleeping(true);
-    GLESDebugDraw *debugDrawFlag;
-    debugDrawFlag = new GLESDebugDraw(PTM_RATIO);
-    m_world->SetDebugDraw(debugDrawFlag);
-    uint32	flags = 0;
-    flags += b2Draw::e_shapeBit;
-    flags += b2Draw::e_jointBit;
-    debugDrawFlag->SetFlags(flags);
+    //GLESDebugDraw *debugDrawFlag;
+    //debugDrawFlag = new GLESDebugDraw(PTM_RATIO);
+    //m_world->SetDebugDraw(debugDrawFlag);
+    //uint32	flags = 0;
+    //flags += b2Draw::e_shapeBit;
+    //flags += b2Draw::e_jointBit;
+    //debugDrawFlag->SetFlags(flags);
 	B2Helper::Instance()->setWorld(m_world);
 
     //--------------end init world----------------------
@@ -116,6 +116,9 @@ bool HelloWorld::init()
     //body->ApplyForce(b2Vec2(0, body->GetMass() * gravity.Length()) , body->GetWorldCenter());
 
     createNewGame();
+
+    Pill *tempPill = Pill::createPillWithType(PT_RED, ccp(CCDirector::sharedDirector()->getVisibleSize().width/2, 500));
+    this->addChild(tempPill);
 	//--------------end test region--------------------
 
 
@@ -176,13 +179,13 @@ bool HelloWorld::ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
 void HelloWorld::ccTouchEnded(CCTouch *pTouch, CCEvent *pEvent)
 {
     CCPoint touchPoint = this->convertTouchToNodeSpace(pTouch);
-    CCLog("Touch Ended. Screen point : ( %f, %f)", touchPoint.x, touchPoint.y);
+   // CCLog("Touch Ended. Screen point : ( %f, %f)", touchPoint.x, touchPoint.y);
     m_role->onTouchEnded(pTouch, pEvent);
 }
 void HelloWorld::ccTouchMoved(CCTouch *pTouch, CCEvent *pEvent)
 {
     CCPoint touchPoint = this->convertTouchToNodeSpace(pTouch);
-    CCLog("Touch Moved. Screen point : ( %f, %f)", touchPoint.x, touchPoint.y);
+    //CCLog("Touch Moved. Screen point : ( %f, %f)", touchPoint.x, touchPoint.y);
     //m_streak->setPosition(touchPoint);
     m_role->onTouchMoved(pTouch, pEvent);
 }
@@ -234,7 +237,8 @@ void HelloWorld::createNewGame()
    
 
     m_role = RoleObject::CreateRole(m_world, NULL);
-    m_role->setWorldPosition(ccp(300, 200));
+    //m_role->setWorldPosition(ccp(300, 200));
+    m_role->resetRole();
     this->addChild(m_role, 10);
     this->stopAllActions();
     this->runAction(JumpFollow::create(m_role->m_visiableNode));
@@ -256,7 +260,7 @@ void HelloWorld::reset()
 {
     if(m_role != NULL && m_role->getParent() != NULL)
     {
-        m_role->setWorldPosition(ccp(100, 100));
+        m_role->resetRole();
         this->setPositionY(0.0f);
         m_role->update(1.0f);
         ForeSceneManager::Instance()->createNewScene("PromiseLand");

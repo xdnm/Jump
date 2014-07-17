@@ -30,6 +30,7 @@ private:
 
 public:
         int m_sumScore;
+        int m_scoreRate;
 private:
     CCNode* m_layer;
     CCLabelAtlas *m_label;
@@ -38,7 +39,7 @@ private:
     int m_bonusSumScore;
 
     int m_lastBonus;
-    int m_scoreRate;
+    
 };
 
 #endif

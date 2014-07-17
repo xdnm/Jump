@@ -115,6 +115,7 @@ void GUILayer::onRoleJumping()
 
 void GUILayer::onRoleHooking()
 {
+    runBounsAction();
     m_hookCount++;
     if(m_hookCount > 7)
         m_hookCount = 7;
@@ -187,4 +188,25 @@ void GUILayer::clearRolePower()
 void GUILayer::textAnimationEnd(CCNode *node)
 {
     node->removeFromParent();
+}
+
+void GUILayer::addBouns(int bouns)
+{
+    m_scoreBoard->addBonus(bouns);
+    runBounsAction();
+}
+
+void GUILayer::runBounsAction()
+{
+    CCActionInterval *scaleAction = CCScaleBy::create(0.1f, 1.3f, 1.2f);
+    m_scoreBoard->runAction(CCSequence::create(scaleAction, scaleAction->reverse(), NULL));
+}
+
+void GUILayer::decreaseScoreRatio()
+{
+    //m_scoreBoard->m_scoreRate--;
+    if(m_scoreBoard->m_scoreRate <= 10)
+        m_scoreBoard->m_scoreRate = 10;
+    else
+        m_scoreBoard->m_scoreRate--;
 }
