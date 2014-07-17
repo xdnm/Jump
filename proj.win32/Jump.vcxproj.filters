@@ -19,6 +19,9 @@
     <Filter Include="Classes\Model">
       <UniqueIdentifier>{2c8e761f-984d-402d-8c09-de4439266a47}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Classes\Visual">
+      <UniqueIdentifier>{12f7cae6-2bd3-4202-98cb-52cf1840a934}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -88,6 +91,42 @@
       <Filter>Classes\Model</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Utils\GameConfig.cpp">
+      <Filter>Classes\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Visual\BackgroundLayer.cpp">
+      <Filter>Classes\Visual</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Visual\MyCCMotionStreak.cpp">
+      <Filter>Classes\Visual</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Visual\CircleLight.cpp">
+      <Filter>Classes\Visual</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Visual\ScoreBoard.cpp">
+      <Filter>Classes\Visual</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Visual\GUILayer.cpp">
+      <Filter>Classes\Visual</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\GameScene.cpp">
+      <Filter>Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Visual\WelcomBoard.cpp">
+      <Filter>Classes\Visual</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Visual\DeadEndBoard.cpp">
+      <Filter>Classes\Visual</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Visual\PowerColumn.cpp">
+      <Filter>Classes\Visual</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Object\RubberBlock.cpp">
+      <Filter>Classes\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Object\Pills.cpp">
+      <Filter>Classes\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Utils\SoundManager.cpp">
       <Filter>Classes\Utils</Filter>
     </ClCompile>
   </ItemGroup>
@@ -169,6 +208,42 @@
       <Filter>Classes\Utils</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Utils\GameConfig.h">
+      <Filter>Classes\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Visual\BackgroundLayer.h">
+      <Filter>Classes\Visual</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Visual\MyCCMotionStreak.h">
+      <Filter>Classes\Visual</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Visual\CircleLight.h">
+      <Filter>Classes\Visual</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Visual\ScoreBoard.h">
+      <Filter>Classes\Visual</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Visual\GUILayer.h">
+      <Filter>Classes\Visual</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\GameScene.h">
+      <Filter>Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Visual\WelcomBoard.h">
+      <Filter>Classes\Visual</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Visual\DeadEndBoard.h">
+      <Filter>Classes\Visual</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Visual\PowerColumn.h">
+      <Filter>Classes\Visual</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Object\RubberBlock.h">
+      <Filter>Classes\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Object\Pills.h">
+      <Filter>Classes\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Utils\SoundManager.h">
       <Filter>Classes\Utils</Filter>
     </ClInclude>
   </ItemGroup>
