@@ -129,6 +129,21 @@
     <ClCompile Include="..\Classes\Utils\SoundManager.cpp">
       <Filter>Classes\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Visual\DecorateObject.cpp">
+      <Filter>Classes\Visual</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Utils\FileHelper.cpp">
+      <Filter>Classes\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Utils\MyLabel.cpp">
+      <Filter>Classes\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Object\MoveBlock.cpp">
+      <Filter>Classes\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Object\BrokenBlock.cpp">
+      <Filter>Classes\Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -245,6 +260,21 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Utils\SoundManager.h">
       <Filter>Classes\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Visual\DecorateObject.h">
+      <Filter>Classes\Visual</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Utils\FileHelper.h">
+      <Filter>Classes\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Utils\MyLabel.h">
+      <Filter>Classes\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Object\MoveBlock.h">
+      <Filter>Classes\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Object\BrokenBlock.h">
+      <Filter>Classes\Object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
