@@ -2,6 +2,9 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
+//LOCAL_SHARED_LIBRARIE := libmaliinstr
+
+
 LOCAL_MODULE := cocos2dcpp_shared
 
 LOCAL_MODULE_FILENAME := libcocos2dcpp
@@ -11,10 +14,12 @@ FILE_LIST += $(wildcard $(LOCAL_PATH)/Classes/Object/*.cpp)
 FILE_LIST += $(wildcard $(LOCAL_PATH)/Classes/Utils/*.cpp)
 FILE_LIST += $(wildcard $(LOCAL_PATH)/Classes/Weapon/*.cpp)
 FILE_LIST += $(wildcard $(LOCAL_PATH)/Classes/Xml/*.cpp)
+FILE_LIST += $(wildcard $(LOCAL_PATH)/Classes/Visual/*.cpp)
 
 LOCAL_SRC_FILES := hellocpp/main.cpp \
                    Classes/AppDelegate.cpp \
-                   Classes/HelloWorldScene.cpp
+                   Classes/HelloWorldScene.cpp\
+                   Classes/GameScene.cpp
                    
 LOCAL_SRC_FILES += $(FILE_LIST:$(LOCAL_PATH)/%=%)
 
@@ -27,6 +32,8 @@ LOCAL_C_INCLUDES += FILE_INCLUDES
 #LOCAL_C_INCLUDES += $(LOCAL_PATH)/Classes/Model
 #LOCAL_C_INCLUDES += $(LOCAL_PATH)/Classes/Object
 #LOCAL_C_INCLUDES += $(LOCAL_PATH)/Classes/Weapon
+#LOCAL_C_INCLUDES += $(LOCAL_PATH)/Classes/Visual
+
 
 
 LOCAL_WHOLE_STATIC_LIBRARIES += cocos2dx_static
