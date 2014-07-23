@@ -129,6 +129,14 @@ void GameScene::ccTouchMoved(CCTouch *pTouch, CCEvent *pEvent)
 
 void GameScene::keyBackClicked(){
     CCLog("Android- KeyBackClicked!");
+
+
+    CCDirector::sharedDirector()->end();
+}
+
+void GameScene::keyMenuClicked(){
+    CCLog("Android- keyMenuClicked!");
+
     if(this->m_state == GS_ONGOING)
     {
         this->setGameState(GS_STOP);
@@ -142,12 +150,8 @@ void GameScene::keyBackClicked(){
         m_label->setString("Pause");
         this->addChild(m_label, 10);
 
-        
-    }
-}
 
-void GameScene::keyMenuClicked(){
-    CCLog("Android- keyMenuClicked!");
+    }
 }
 
 void GameScene::roleDead()

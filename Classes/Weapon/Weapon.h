@@ -123,9 +123,9 @@ public:
     {
         CCPoint point = m_hand->getPosition();
         if(m_isFaceLeft)
-            point = point + ccp(-m_wave1->xOffset, 0);
+            point = point + ccp(-m_wave1->xOffset, 40);
         else
-            point = point + ccp(m_wave1->xOffset, 0);
+            point = point + ccp(m_wave1->xOffset, 40);
 
         return point;
     }

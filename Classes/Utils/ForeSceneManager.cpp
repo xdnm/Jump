@@ -13,6 +13,7 @@ ForeSceneManager::ForeSceneManager()
 
     m_screenSize = CCDirector::sharedDirector()->getVisibleSize();
     
+    m_layer = NULL;
 }
 
 void ForeSceneManager::createNewScene(char *SceneName)
@@ -35,12 +36,13 @@ void ForeSceneManager::createNewScene(char *SceneName)
         CCNode *node = dynamic_cast<CCNode*>(m_screenContent->at(i));
         if(node != NULL)
             m_layer->removeChild(node);
+
     }
     m_screenContent->clear();
     
     
-    initBlockArray();
-    initEdgeArray();
+    //initBlockArray();
+    //initEdgeArray();
 
     m_lastPillHeight = 0;
     this->schedule(schedule_selector(ForeSceneManager::generateBlocks1));
@@ -96,7 +98,7 @@ void ForeSceneManager::generateBlocks(int layyerPositionY)
 void ForeSceneManager::blocksManage(int height)
 {
     int screenTop = height + m_screenSize.height;
-
+    
    // xml_node<> *node = m_file.first_node();
 
     Block* lastBlock = NULL;
@@ -124,7 +126,7 @@ void ForeSceneManager::blocksManage(int height)
     if(maxHeight < screenTop)
     {
         //try to get the the block from block buffer 10 times
-        Block *tempObject;
+        /*Block *tempObject;
         for(int i = 0; i < 10; i++)
         {
             tempObject =(Block*)( m_blockArray->randomObject());
@@ -133,14 +135,22 @@ void ForeSceneManager::blocksManage(int height)
                 break;
 
             tempObject = NULL;
-        }
+        }*/
+
+        Block *tempObject;
+        tempObject = getRandomBlockFromScene();
+
+
 
         if(tempObject != NULL)
         {
+            int unitHeight = m_unitHeight + (maxHeight/8000) * 5;
             int xPosition = rand()%(int)(m_screenSize.width - tempObject->getB2NodeSize().width) + tempObject->getB2NodeSize().width / 2;
-            int yPosition = maxHeight + (rand()%4 + 1)*m_unitHeight;
+            int yPosition = maxHeight + (rand()%4 + 1)*unitHeight;
             //tempObject->setBlockPosition(ccp(xPosition, yPosition));
+            tempObject->setAlive(true);
             tempObject->setB2NodePostion(ccp(xPosition, yPosition));
+           
             m_layer->addChild((CCNode*)tempObject);
 
             m_screenContent->push_back(tempObject);
@@ -271,7 +281,7 @@ void ForeSceneManager::monstorManage(int height)
 void ForeSceneManager::pillManage(int height)
 {
     int upperHeight = height + m_screenSize.height;
-    if(upperHeight > m_lastPillHeight + 2000)
+    if(upperHeight > m_lastPillHeight + 1000)
     {
         if(CCRANDOM_0_1() > 0.5f)
         {
@@ -331,6 +341,19 @@ B2CCNode *ForeSceneManager::nameProject(char *name)
 Block* ForeSceneManager::getRandomBlockFromScene()
 {
     int ranNum = rand()%100 + 1;
+    
+    int presentheight = 0;
+    if(m_layer != NULL)
+        presentheight = -m_layer->getPositionY();
+
+    if(ranNum < 80 - presentheight / 8000 )
+        ranNum = rand()%80 + 1;
+    else
+        ranNum = rand()%20 + 81;
+
+    if(ranNum > 100)
+        ranNum = 100;
+
     Block *block = NULL;
     xml_node<> *blocksNode = m_presentScene->first_node("Blocks");
 
@@ -356,10 +379,25 @@ Block* ForeSceneManager::getRandomBlockFromScene()
             else if(strcmp(blockNode->first_attribute("Class")->value(), "RubberBlock") == 0)
             {
                 block = RubberBlock::createWithConfigNode(blockNode);
+                //block = BrokenBlock::createBrokenBlock(blockNode);
+
+                block->setAlive(false);
+            }
+            else if(strcmp(blockNode->first_attribute("Class")->value(), "MoveBlock") == 0)
+            {
+                block = MoveBlock::createMoveBlock(blockNode, 3.0f, 50);
+                block->setAlive(false);
+            }
+            else if(strcmp(blockNode->first_attribute("Class")->value(), "BrokenBlock") == 0)
+            {
+                block = BrokenBlock::createBrokenBlock(blockNode);
+                block->setAlive(false);
             }
 
 
-             break;
+
+
+            break;
         }
     }
     if(block == NULL)

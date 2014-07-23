@@ -37,6 +37,7 @@ bool GUILayer::initWithGameLayerWithScene(CCNode *scene, CCLayer *layer)
     this->addChild(m_scoreBoard, 10);
 
     m_hookCount = 0;
+    m_powerUnit = 2;
 
     m_powerColum = PowerColumn::createPowerColumn();
     m_powerColum->reset();
@@ -99,6 +100,8 @@ void GUILayer::reset()
     stopDeadBoard();
     m_scoreBoard->reset();
     m_powerColum->reset();
+
+    m_powerUnit = 2;
 }
 
 GUILayer * GUILayer::Instance()
@@ -110,7 +113,7 @@ void GUILayer::onRoleJumping()
 {
     m_hookCount = 0;
     m_scoreBoard->clearBonus();
-    m_powerColum->addPower(2);
+    m_powerColum->addPower(m_powerUnit);
 }
 
 void GUILayer::onRoleHooking()
@@ -209,4 +212,16 @@ void GUILayer::decreaseScoreRatio()
         m_scoreBoard->m_scoreRate = 10;
     else
         m_scoreBoard->m_scoreRate--;
+}
+
+void GUILayer::addPowerUnit(int parm /* = 0 */)
+{
+    if(parm == 0)
+    {
+        m_powerUnit += 2;
+    }
+    else
+    {
+        m_powerUnit += parm;
+    }
 }

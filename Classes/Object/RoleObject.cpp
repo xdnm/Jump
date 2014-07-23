@@ -78,7 +78,7 @@ bool RoleObject::initWithWorld(b2World* world, void *parm)
 
         m_bounce = false;
 
-        m_visiableNode = CCSprite::create();
+        m_visiableNode = CCNode::create();
         this->addChild(m_visiableNode);
 
 
@@ -461,7 +461,7 @@ void RoleObject::onCollied(b2Contact *contact, b2Body *bodyOther)
         else
             selfBody = contact->GetFixtureA()->GetBody();
 
-        if(m_weapon->isHooked())
+        if(m_weapon->isHooked() && !TagHelper::Instance()->isObject(otherNode->getTag(), ON_PILLS))
         {
             isEnable = false;
             break;
@@ -476,7 +476,16 @@ void RoleObject::onCollied(b2Contact *contact, b2Body *bodyOther)
             if(selfBody == m_bottomBody && selfBody->GetPosition().y >= bodyOther->GetPosition().y)
             {
                 if(m_innerBody->GetLinearVelocity().y < 0.0f)
+                {
                     jump();
+                    Block *block = dynamic_cast<Block*>(otherNode);
+                    if(block != NULL)
+                        block->colliedWithRole(contact, bodyOther);
+                }
+
+                /*Block *block = dynamic_cast<Block*>(otherNode);
+                if(block != NULL)
+                    block->colliedWithRole(contact, bodyOther);*/
                 isEnable = true;
                 break;
             }
@@ -596,6 +605,7 @@ void RoleObject::update(float delta)
         break;
         }
 
+        
         m_gotLastPill->removeFromParent();
         m_gotLastPill = NULL;
     }
@@ -809,8 +819,15 @@ bool RoleObject::onTouchMoved(CCTouch *pTouch, CCEvent *pEvent)
     if(m_weapon->isHooked() && !B2Helper::Instance()->getWorld()->IsLocked())
     {
         CCPoint dir =pTouch->getLocationInView() - pTouch->getStartLocationInView(); 
-
-        m_innerBody->ApplyForce(b2Vec2(dir.x * 5, dir.y * 5), m_innerBody->GetWorldCenter());
+        b2Vec2 linear = m_innerBody->GetLinearVelocity();
+        linear.Normalize();
+        float length;
+        if(dir.x > 0)
+            length = dir.getLength();
+        else
+            length = -dir.getLength();
+        linear = b2Vec2(dir.x * 5, 0);
+        m_innerBody->ApplyForce(linear, m_innerBody->GetWorldCenter());
         CCLog("touch move dir : x: %f, y:%f", dir.x, dir.y);
     }
     return true;
@@ -1058,37 +1075,15 @@ void RoleObject::smallJump(int massRadio)
 void RoleObject::gotPill(PillType pillType, Pill *thepill)
 {
 
-    //switch (pillType)
-    //{
-    //case PT_BLUE:
-    //    m_gotLastPill = thepill;
-    //    break;
-    //case PT_RED:
-    //    //gotRedPill();
-    //    m_gotPillType = PT_RED;
-    //    break;
-    //case PT_GREEN:
-    //    //gotGreenPill();
-    //    m_gotPillType = PT_GREEN;
-    //    break;
-    //case PT_YELLOW:
-    //    //gotYellowPill();
-    //    m_gotPillType = PT_YELLOW;
-    //    break;
-    //default:
-    //    m_gotPillType = PT_NONE;
-    //    break;
-    //}
-    //thepill->removeFromParent();
-    static Pill* lastPill = NULL;
-    if(lastPill == thepill)
-        return ;
-    else
+   
+    if(thepill->IsAffective())
     {
         m_gotLastPill = thepill;
-        lastPill = m_gotLastPill;
+        //lastPill = m_gotLastPill;
         GUILayer::Instance()->addBouns(100);
         SoundManager::Instance()->makeEffect(EF_PILL);
+
+        thepill->setIsAffective(false);
     }
 
     
@@ -1098,6 +1093,8 @@ void RoleObject::gotPill(PillType pillType, Pill *thepill)
 void RoleObject::gotBluePill()
 {
     m_superJumpRatio *= 1.2f;
+
+    GUILayer::Instance()->addPowerUnit(2);
 
     CCParticleSystemQuad *particle = CCParticleSystemQuad::create("particle_pill.plist");
     particle->setAnchorPoint(ccp(0.5f, 0.5f));
@@ -1124,7 +1121,7 @@ void RoleObject::gotYellowPill()
 }
 void RoleObject::gotRedPill()
 {
-    m_length += 1.2;
+    m_length += 3;
     m_outRadius = m_length;
     //b2Vec2 linearVec = m_innerBody->GetLinearVelocity();
     B2Helper::Instance()->setMass(m_innerBody, m_innerBody->GetMass() * 1.05f);

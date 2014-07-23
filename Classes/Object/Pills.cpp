@@ -34,6 +34,7 @@ bool Pill::initPillWithType(PillType type, CCPoint position)
     m_position = position;
     this->setPosition(m_position);
     m_pillType = type;
+    m_isAffective = true;
     m_size = CCSizeMake(60, 60);
 
     b2PolygonShape shape;
@@ -55,6 +56,7 @@ bool Pill::initPillWithType(PillType type, CCPoint position)
 
     if(m_pillType == PT_RED)
     {
+        
         m_visiableNode = CCSprite::create("redpill.png");
     }
     else if(m_pillType == PT_GREEN)
@@ -84,7 +86,7 @@ bool Pill::initPillWithType(PillType type, CCPoint position)
 
 
     CCActionInterval *rotate = CCRotateTo::create(0.05f, 15.0f, 15.0f);
-    CCActionInterval *rotateBack = CCRotateTo::create(0.05, -15.0f, -15.0f);
+    CCActionInterval *rotateBack = CCRotateTo::create(0.05f, -15.0f, -15.0f);
    
     CCActionInterval *innerRep = CCRepeat::create(CCSequence::create(rotate, rotateBack, NULL), 5);
     CCActionInterval *delay = CCDelayTime::create(1.0f);
@@ -98,7 +100,7 @@ bool Pill::initPillWithType(PillType type, CCPoint position)
 void Pill::releaseUpdate(float dt)
 {
     int yPosition = convertToWorldSpace(ccp(0, 0)).y;
-    CCLog("pill position %f", yPosition);
+    //CCLog("pill position %f", yPosition);
     if( yPosition < -100 || yPosition > 1500)
     {
         this->removeFromParent();
@@ -108,4 +110,14 @@ void Pill::releaseUpdate(float dt)
 void Pill::onCollied(b2Contact* contact, b2Body *bodyOther)
 {
 
+}
+
+bool Pill::IsAffective()
+{
+    return m_isAffective;
+}
+
+void Pill::setIsAffective(bool flag)
+{
+    m_isAffective = flag;
 }

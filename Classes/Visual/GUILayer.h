@@ -38,6 +38,8 @@ public:
     void runBounsAction();
 
     void decreaseScoreRatio();
+
+    void addPowerUnit(int parm = 0);
 protected:
 
 
@@ -55,6 +57,8 @@ private:
     static GUILayer *instance;
 
     int m_hookCount;
+
+    int m_powerUnit;
 };
 
 #endif

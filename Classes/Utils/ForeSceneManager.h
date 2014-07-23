@@ -4,7 +4,9 @@
 #include "Object/RigidBlock.h"
 #include "Object/RigidEdge.h"
 #include "Object/RubberBlock.h"
+#include "Object/BrokenBlock.h"
 #include "Object/MonsterMushroom.h"
+#include  "Object/MoveBlock.h"
 #include "Object/Pills.h"
 #include "GameConfig.h"
 USING_NS_CC;

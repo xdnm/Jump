@@ -37,10 +37,16 @@ public:
     void releaseUpdate(float dt);
 
     virtual void onCollied(b2Contact* contact, b2Body *bodyOther);
+
+    bool IsAffective();
+    void setIsAffective(bool flag);
+
 protected:
 private:
     PillType m_pillType;
 
     b2Body *m_polyBody;
+
+    bool m_isAffective;
 };
 #endif

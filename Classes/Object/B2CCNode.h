@@ -40,7 +40,7 @@ public:
     void setB2NodePostion(CCPoint point)
     {
         m_position = point;
-        setAlive(true);
+        //setAlive(true);
         onB2PositionChanged();
     }
 

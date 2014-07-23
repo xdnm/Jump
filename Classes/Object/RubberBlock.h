@@ -14,6 +14,8 @@ public:
 	~RubberBlock();
 
 	static RubberBlock* createRubberBlock(CCPoint point, CCSize size, void *parm);
+    bool initWithPointSize(CCPoint point, CCSize size, void *parm);
+    bool initWithConfigNode(xml_node<> *node);
     /**Use the Xml config node to create a RubberBlock, most inner logic is same
     with the normal create function*/
     static RubberBlock* createWithConfigNode(xml_node<> *node);
@@ -30,29 +32,30 @@ public:
     bool tryLaunchParticle(CCPoint emitPoint);
 
     void update(float dt);
+
+    void changeTexture(const char* fileName);
 private:
-	bool initWithPointSize(CCPoint point, CCSize size, void *parm);
-    bool initWithConfigNode(xml_node<> *node);
+
 	bool createBody();
 	bool initRenderData();
 
 
     void makeRoleJump(float dt);
 protected:
-
-
-private:
-	b2Body *m_polyBody;
+    b2Body *m_polyBody;
     b2Body *m_topBody;
     b2Body *m_bottomBody;
-	CCTexture2D *m_texture;
-	
-	//render data
-	Vertex2D m_textCoord[4];
-	Vertex2D m_vertexCoord[4];
+    CCTexture2D *m_texture;
+
+    //render data
+    Vertex2D m_textCoord[4];
+    Vertex2D m_vertexCoord[4];
 
     float m_time;
     float polyWidth, polyHeight;
+
+private:
+	
 };
 
 #endif

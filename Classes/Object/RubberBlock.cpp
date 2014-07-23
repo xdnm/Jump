@@ -83,7 +83,7 @@ void RubberBlock::setAlive(bool flag)
 
 bool RubberBlock::setBlockPosition(cocos2d::CCPoint position)
 {
-    setAlive(true);
+    //setAlive(true);
 
 	m_position = position;
 
@@ -95,7 +95,10 @@ bool RubberBlock::setBlockPosition(cocos2d::CCPoint position)
 
 void RubberBlock::onB2PositionChanged()
 {
-    setAlive(true);
+    //setAlive(true);
+
+    if(!m_isAlive)
+        return ;
     this->setPosition(m_position);
     m_bottomBody->SetTransform(b2Vec2(m_position.x/PTM_RATIO, m_position.y/PTM_RATIO - polyHeight * 1.5f), 0.0f);
     m_topBody->SetTransform(b2Vec2(m_position.x/PTM_RATIO, m_position.y/PTM_RATIO + polyHeight * 1.5f), 0.0f);
@@ -261,3 +264,10 @@ RubberBlock* RubberBlock::createWithConfigNode(xml_node<> *node)
         return NULL;
     }
 }
+
+void RubberBlock::changeTexture(const char* fileName)
+{
+    m_texture = cocos2d::CCTextureCache::sharedTextureCache()->addImage(fileName);
+
+}
+

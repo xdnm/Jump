@@ -3,6 +3,8 @@
 
 #include "cocos2d.h"
 #include "Utils/SoundManager.h"
+#include "Utils/FileHelper.h"
+#include "Utils/MyLabel.h"
 USING_NS_CC;
 
 class DeadEndBoard : public CCSprite

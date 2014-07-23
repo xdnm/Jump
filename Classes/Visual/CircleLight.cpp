@@ -42,7 +42,8 @@ bool CircleLight::initWithAllParm(int innerRadius, int radius, float timeCircle,
 {
     if(innerRadius > radius || timeCircle <= 0.0f || alphaParm < 0.0f)
         return false;
-
+    if(timeCircle <= 0.1f)
+        timeCircle += 0.2f;
     m_innerRadius = innerRadius;
     m_radius = radius;
     m_timeCircle = timeCircle;
@@ -89,7 +90,9 @@ void CircleLight::loadShaderVertex(const char *vert, const char *frag)
     CCGLProgram *shader = new CCGLProgram();
     
     shader->initWithVertexShaderFilename(vert, frag);
-
+   
+    //CCLog("Shader log : %s", shader->fragmentShaderLog());
+    
     shader->addAttribute(kCCAttributeNamePosition, kCCVertexAttrib_Position);
     shader->addAttribute(kCCAttributeNameColor, kCCVertexAttrib_Color);
     shader->addAttribute(kCCAttributeNameTexCoord, kCCVertexAttrib_TexCoords);
@@ -163,7 +166,7 @@ void CircleLight::setContentSize(const CCSize& contentSize)
 void CircleLight::draw()
 {
     CC_NODE_DRAW_SETUP();
-
+    ccGLBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     CCGLProgram *shader = getShaderProgram();
     shader->setUniformLocationWith2f(m_ucenter, m_center.x, m_center.y);
     shader->setUniformLocationWith1f(m_uinnerRadius, m_innerRadius);

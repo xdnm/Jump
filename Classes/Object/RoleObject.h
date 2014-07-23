@@ -53,6 +53,8 @@ public:
     void setAcceleration(CCAcceleration *acceleration);
 
     void updateAcceleration(float dt);
+
+    void setFaceLeft(bool isFaceLeft);
 private:
 	RoleObject();
 
@@ -68,7 +70,7 @@ private:
 
     void hookAction(b2Body *hookBody, b2Vec2 point);
 
-    void setFaceLeft(bool isFaceLeft);
+
 
     void beenAttacked(Monster *monster);
     bool isProtected();

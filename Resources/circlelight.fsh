@@ -15,17 +15,20 @@ void main(void)
 	float timeCircle = u_timeCircle;
 	float time = mod(u_time, timeCircle);
 	time = abs(time - timeCircle/2.0);
+	
 	if(dis < u_radius)
 	{
-		alpha =1.0- smoothstep(u_innerRadius, u_radius, dis);
-		//alpha = alpha * clamp((time + 1.0) / timeCircle/2.0, 0.0f, 1.0f);
-		alpha = alpha * (time / timeCircle/2.0f +u_alphaParm);
-		//gl_FragColor = vec4(1.0, 0.0, 0.0, alpha);
+	    alpha =1.0- smoothstep(u_innerRadius, u_radius, dis);
+		float parm1 = time/(timeCircle*2.0);
+		//parm1 = parm1 * 0.5f;
+		parm1 = parm1 + u_alphaParm;
+	    //alpha = alpha * ((time / timeCircle)/2.0f +u_alphaParm);
+
+		alpha =alpha * parm1;
 		gl_FragColor = vec4(u_color.rgb, alpha);
 	}
 	else
-	{
-		gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
-	}
+		gl_FragColor=vec4(1.0, 0.0, 0.0, 0.0);
+
 
 }

@@ -6,4 +6,14 @@
     <RigidBlock4 Class="RubberBlock" Texture="clouds2.png" Height="50" Width="150"/>
     <RigidBlock5 Class="RubberBlock" Texture="clouds3.png" Height="50" Width="150"/>
     <RigidBlock6 Class="RubberBlock" Texture="clouds4.png" Height="50" Width="150"/>
+    <RigidBlock8 Class="MoveBlock" Texture="bluecloud.png" Height="50" Width="150"/>
+    <RigidBlock9 Class="MoveBlock" Texture="bluecloud1.png" Height="50" Width="150"/>
+    <RigidBlock10 Class="MoveBlock" Texture="bluecloud2.png" Height="50" Width="150"/>
+    <RigidBlock11 Class="MoveBlock" Texture="bluecloud3.png" Height="50" Width="150"/>
+    <RigidBlock12 Class="BrokenBlock" Texture="redcloud.png" Height="50" Width="150"/>
+    <RigidBlock13 Class="BrokenBlock" Texture="redcloud1.png" Height="50" Width="150"/>
+    <RigidBlock14 Class="BrokenBlock" Texture="redcloud2.png" Height="50" Width="150"/>
+    <RigidBlock15 Class="BrokenBlock" Texture="redcloud3.png" Height="50" Width="150"/>
+
+
 </Blocks>

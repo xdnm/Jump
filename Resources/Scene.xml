@@ -5,7 +5,9 @@
         <Monsters Mushroom1="50" Mushroom2="10"/>
     </Scene>
     <Scene Name="BoardLand" Level="1-2" ObjectLevel="1">
-        <Blocks RigidBlock3="25" RigidBlock4="50" RigidBlock5="75" RigidBlock6="100"/>
+        <Blocks RigidBlock3="20" RigidBlock4="40" RigidBlock5="60" RigidBlock6="80" 
+                RigidBlock8="85"  RigidBlock9="87"  RigidBlock10="93"  RigidBlock11="94"
+                 RigidBlock12="95" RigidBlock13="96" RigidBlock14="97" RigidBlock15="100"/>
         <Monsters Mushroom1="100"/>
     </Scene>
 </Scenes>

@@ -51,13 +51,15 @@ bool HelloWorld::init()
 	//world = new b2World()
 	m_world = new b2World(gravity);
 	m_world->SetAllowSleeping(true);
-    //GLESDebugDraw *debugDrawFlag;
-    //debugDrawFlag = new GLESDebugDraw(PTM_RATIO);
-    //m_world->SetDebugDraw(debugDrawFlag);
-    //uint32	flags = 0;
-    //flags += b2Draw::e_shapeBit;
-    //flags += b2Draw::e_jointBit;
-    //debugDrawFlag->SetFlags(flags);
+
+    /*GLESDebugDraw *debugDrawFlag;
+    debugDrawFlag = new GLESDebugDraw(PTM_RATIO);
+    m_world->SetDebugDraw(debugDrawFlag);
+    uint32	flags = 0;
+    flags += b2Draw::e_shapeBit;
+    flags += b2Draw::e_jointBit;
+    debugDrawFlag->SetFlags(flags);*/
+
 	B2Helper::Instance()->setWorld(m_world);
 
     //--------------end init world----------------------
@@ -116,20 +118,22 @@ bool HelloWorld::init()
     //body->ApplyForce(b2Vec2(0, body->GetMass() * gravity.Length()) , body->GetWorldCenter());
 
     createNewGame();
-
+    CCLog("1debug here!!");
     Pill *tempPill = Pill::createPillWithType(PT_RED, ccp(CCDirector::sharedDirector()->getVisibleSize().width/2, 500));
     this->addChild(tempPill);
 	//--------------end test region--------------------
-
-
+    
+    CCLog("1debug here!!");
 	//--------------Register region--------------------------
-    ForeSceneManager::Instance()->setWatchLayer(this);
+    //ForeSceneManager::Instance()->setWatchLayer(this);
     //ForeSceneManager::Instance()->createNewScene("PromiseLand");
     B2Handler::createB2Handler(m_world);
 	this->schedule(schedule_selector(HelloWorld::worldTick));
 	CCDirector::sharedDirector()->getTouchDispatcher()->addTargetedDelegate(this, 0, true);
     this->setAccelerometerEnabled(true);
     
+    CCLog("2debug here!!");
+
 	//--------------end register region---------------------
     return true;
 }
@@ -242,6 +246,7 @@ void HelloWorld::createNewGame()
     this->addChild(m_role, 10);
     this->stopAllActions();
     this->runAction(JumpFollow::create(m_role->m_visiableNode));
+    ForeSceneManager::Instance()->setWatchLayer(this);
     ForeSceneManager::Instance()->createNewScene("PromiseLand");
 
     
@@ -262,6 +267,7 @@ void HelloWorld::reset()
     {
         m_role->resetRole();
         this->setPositionY(0.0f);
+        m_role->setFaceLeft(true);
         m_role->update(1.0f);
         ForeSceneManager::Instance()->createNewScene("PromiseLand");
         return;

@@ -16,7 +16,7 @@ public:
 	virtual void setAlive(bool flag){};
 	virtual bool setBlockPosition(cocos2d::CCPoint position){return true;};
     virtual bool tryLaunchParticle(CCPoint emitPoint){return true;};
-
+    virtual void colliedWithRole(b2Contact *contact, b2Body *bodyOther){};
 private:
 	virtual bool createBody(){return true;};
 	virtual bool initRenderData(){return true;};
